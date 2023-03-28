@@ -41,7 +41,7 @@ func main() {
 			} else if strings.TrimSpace(svcDef.Language) == "" {
 					panic(svcDef.Name + " app definition doesn't have `language` defined!")
 			} else if strings.TrimSpace(svcDef.MajorVersion) == "" {
-				panic(svcDef.Name + " app definition doesn't have `manor_version` defined!")
+				panic(svcDef.Name + " app definition doesn't have `major_version` defined!")
 			} else if strings.TrimSpace(svcDef.GitRepo) == "" {
 				panic(svcDef.Name + " app definition doesn't have `git_repo` defined!")
 			} else if strings.TrimSpace(svcDef.GithubDeployKey) == "" {
