@@ -1,0 +1,49 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: new-product-pipeline
+spec:
+  params:
+    - name: product_name
+      type: string
+      description: Name of the product
+    # Other params as necessary
+
+  workspaces:
+    # Workspace(s) to clone required resources into
+
+  tasks:
+    - validate the parameters and return if bad
+    if: predefined template => true
+      - action: Invoke predefined pipeline with required parameters
+      - action: Wait for pipeline to finish and store results
+    else:
+      - action: clone required repos into workspace
+      - action: loop all frontend & backend definitions, run this for each frontend
+          - clone frontend git repo
+          - push to git changes
+            - scaffold commands to generate initial files
+            - copy Dockerfile and related infra files
+            - copy k8s manifests for the application
+          - All dependency components
+            - Databases like Mysql / Postgres
+              - Create an ephemeral database / provide credentials
+              - update environment variables in external secrets operator
+            - Logging => In house ELK setup / Datadog etc.
+            - Monitoring => In house grafana + prometheus / Datadog etc. (basic setup in v1)
+            - Caching using Redis / Memcache => (not supported in v1)
+          - Application deployment models
+            frontend:
+              - eks container deploy => nginx server serving assets
+                - build the image and push to ecr
+                - apply required k8s manifests to kubernetes cluster in app_name namespace
+              - s3 + cloudfront => cdn enabled (not supported in v1)
+                # We can implement using terragrunt / terraform modules here
+                - create s3 bucket
+                - create cloudfront dist
+                - setup path based routing for frontend through EKS
+            backend:
+              - eks container deploy
+                - build the image and push to ecr
+                - apply required k8s manifests to kubernetes cluster in app_name namespace
+            - After tasks complete, save information about urls to send back to user
