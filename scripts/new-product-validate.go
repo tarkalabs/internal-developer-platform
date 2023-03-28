@@ -13,6 +13,7 @@ type SvcDefinition struct {
 	Description string `json:"description"`
   GitRepo string `json:"git_repo"`
 	GitBranch string `json:"git_branch"`
+	GithubDeployKey string `json:"github_deploy_key"`
   DBConnString string `json:"db_conn_string"`
 }
 
@@ -31,14 +32,16 @@ func main() {
     for _, svcDef := range svcDefs {
 			svcJson,_ := json.Marshal(svcDef)
 			fmt.Println("Validating app definition: ", string(svcJson))
-			if strings.TrimSpace(svcDef.Type) == "" {
-				panic("One of the app definitions doesn't have `type` defined!")
-			} else if strings.TrimSpace(svcDef.Version) == "" {
-				panic("One of the app definitions doesn't have `version` defined!")
-			} else if strings.TrimSpace(svcDef.Name) == "" {
+			if strings.TrimSpace(svcDef.Name) == "" {
 				panic("One of the app definitions doesn't have `name` defined!")
+			} else if strings.TrimSpace(svcDef.Type) == "" {
+					panic(svcDef.Name + " app definition doesn't have `type` defined!")
+			} else if strings.TrimSpace(svcDef.Version) == "" {
+				panic(svcDef.Name + " app definition doesn't have `version` defined!")
 			} else if strings.TrimSpace(svcDef.GitRepo) == "" {
-				panic("One of the app definitions doesn't have `git_repo` defined!")
+				panic(svcDef.Name + " app definition doesn't have `git_repo` defined!")
+			} else if strings.TrimSpace(svcDef.GithubDeployKey) == "" {
+				panic(svcDef.Name + " app definition doesn't have `github_deploy_key` defined!")
 			} else {
 				fmt.Printf("Microservice %s validation successful!\n", svcDef.Name)
 			}
