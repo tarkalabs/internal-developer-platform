@@ -6,25 +6,6 @@ import (
 	"encoding/json"
 )
 
-var SupportedTemplates = map[string][]string{
-	"nodejs": []string{"18"},
-}
-
-var SupportedPredefinedTemplates = []string{
-	"nodejs:18|react:18",
-}
-
-type SvcDefinition struct {
-  Language string `json:"language"`
-	MajorVersion string `json:"major_version"`
-  Name string `json:"name"`
-	Description string `json:"description"`
-  GitRepo string `json:"git_repo"`
-	GitBranch string `json:"git_branch"`
-	GithubDeployKey string `json:"github_deploy_key"`
-  DBConnString string `json:"db_conn_string"`
-}
-
 func containsStringArray(arr []string, target string) bool {
 	found := false
 	for _, entry := range arr {
@@ -80,5 +61,3 @@ func main() {
 		}
 	}
 }
-
-// go run template1.tmpl template2.tmpl | tee >(sed -e 's/.tmpl/.out/g' | xargs -n 1 touch)
