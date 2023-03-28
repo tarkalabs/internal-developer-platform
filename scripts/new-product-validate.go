@@ -6,9 +6,13 @@ import (
 	"encoding/json"
 )
 
+var SupportedTemplates = map[string][]string{
+	"nodejs": []string{"18"},
+}
+
 type SvcDefinition struct {
-  Type string `json:"type"`
-	Version string `json:"version"`
+  Language string `json:"language"`
+	MajorVersion string `json:"major_version"`
   Name string `json:"name"`
 	Description string `json:"description"`
   GitRepo string `json:"git_repo"`
@@ -34,16 +38,31 @@ func main() {
 			fmt.Println("Validating app definition: ", string(svcJson))
 			if strings.TrimSpace(svcDef.Name) == "" {
 				panic("One of the app definitions doesn't have `name` defined!")
-			} else if strings.TrimSpace(svcDef.Type) == "" {
-					panic(svcDef.Name + " app definition doesn't have `type` defined!")
-			} else if strings.TrimSpace(svcDef.Version) == "" {
-				panic(svcDef.Name + " app definition doesn't have `version` defined!")
+			} else if strings.TrimSpace(svcDef.Language) == "" {
+					panic(svcDef.Name + " app definition doesn't have `language` defined!")
+			} else if strings.TrimSpace(svcDef.MajorVersion) == "" {
+				panic(svcDef.Name + " app definition doesn't have `manor_version` defined!")
 			} else if strings.TrimSpace(svcDef.GitRepo) == "" {
 				panic(svcDef.Name + " app definition doesn't have `git_repo` defined!")
 			} else if strings.TrimSpace(svcDef.GithubDeployKey) == "" {
 				panic(svcDef.Name + " app definition doesn't have `github_deploy_key` defined!")
 			} else {
-				fmt.Printf("Microservice %s validation successful!\n", svcDef.Name)
+				if _, ok := SupportedTemplates[svcDef.Language]; ok {
+					found := false
+					for _, version := range SupportedTemplates[svcDef.Language] {
+						if version == svcDef.MajorVersion {
+							found = true
+							break
+						}
+					}
+					if found {
+						fmt.Printf("Microservice %s validation successful!\n", svcDef.Name)
+					} else {
+						panic(svcDef.Name + " app definition " + svcDef.Language + " version " + svcDef.MajorVersion + " is not supported!")
+					}
+				} else {
+					panic(svcDef.Name + " app definition has unsupported language type: " + svcDef.Language)
+				}
 			}
 		}
 	}
