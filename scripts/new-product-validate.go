@@ -10,6 +10,10 @@ var SupportedTemplates = map[string][]string{
 	"nodejs": []string{"18"},
 }
 
+var SupportedPredefinedTemplates = []string{
+	"nodejs:18|react:18",
+}
+
 type SvcDefinition struct {
   Language string `json:"language"`
 	MajorVersion string `json:"major_version"`
@@ -21,9 +25,25 @@ type SvcDefinition struct {
   DBConnString string `json:"db_conn_string"`
 }
 
+func containsStringArray(arr []string, target string) bool {
+	found := false
+	for _, entry := range arr {
+		if target == entry {
+			found = true
+			break
+		}
+	}
+	return found
+}
+
 func main() {
-	if len(strings.TrimSpace(os.Getenv("PREDEFINED_TEMPLATE"))) > 0 {
-		fmt.Println("Using predefined template: ", os.Getenv("PREDEFINED_TEMPLATE"))
+	predefinedTemplate := strings.TrimSpace(os.Getenv("PREDEFINED_TEMPLATE"))
+	if len(predefinedTemplate) > 0 {
+		if containsStringArray(SupportedPredefinedTemplates, predefinedTemplate) {
+			fmt.Println("Predefined template:", predefinedTemplate, "exists. Validation successful!")
+		} else {
+			panic("Predefined template named " + predefinedTemplate + " isn't found!")
+		}
 	} else {
 		fmt.Println("Not a predefined template. Validating each app definition.")
 		svcData, err := os.ReadFile(os.Getenv("MICROSERVICES_JSON_FILE_PATH"))
@@ -32,10 +52,10 @@ func main() {
 		if err := json.Unmarshal([]byte(svcData), &svcDefs); err != nil {
 			panic(err)
 		}
-		fmt.Println("App definitions found total: ", len(svcDefs))
+		fmt.Println("App definitions found total:", len(svcDefs))
     for _, svcDef := range svcDefs {
 			svcJson,_ := json.Marshal(svcDef)
-			fmt.Println("Validating app definition: ", string(svcJson))
+			fmt.Println("Validating app definition:", string(svcJson))
 			if strings.TrimSpace(svcDef.Name) == "" {
 				panic("One of the app definitions doesn't have `name` defined!")
 			} else if strings.TrimSpace(svcDef.Language) == "" {
@@ -48,14 +68,7 @@ func main() {
 				panic(svcDef.Name + " app definition doesn't have `github_deploy_key` defined!")
 			} else {
 				if _, ok := SupportedTemplates[svcDef.Language]; ok {
-					found := false
-					for _, version := range SupportedTemplates[svcDef.Language] {
-						if version == svcDef.MajorVersion {
-							found = true
-							break
-						}
-					}
-					if found {
+					if containsStringArray(SupportedTemplates[svcDef.Language], svcDef.MajorVersion) {
 						fmt.Printf("Microservice %s validation successful!\n", svcDef.Name)
 					} else {
 						panic(svcDef.Name + " app definition " + svcDef.Language + " version " + svcDef.MajorVersion + " is not supported!")
