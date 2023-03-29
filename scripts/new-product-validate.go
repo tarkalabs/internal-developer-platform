@@ -76,3 +76,7 @@ func main() {
     fmt.Println("All microservices validation successfully completed!")
   }
 }
+
+// Name should only contain hyphens(-)
+// Github deploy key cross check
+// DBConnString validate if possible
