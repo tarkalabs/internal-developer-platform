@@ -1,0 +1,42 @@
+name: deploy-to-kubernetes
+
+# Triggers on pushing to branch specified
+on:
+  push:
+    branches: [ {{ .GitBranch }} ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build-and-deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        id: configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: {{ `${{ secrets.AWS_ACCESS_KEY_ID }}` }}
+          aws-secret-access-key: {{ `${{ secrets.AWS_SECRET_ACCESS_KEY }}` }}
+          aws-region: {{ `${{ secrets.AWS_REGION }}` }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Set required custom build variables and update env vars in files
+        id: custom_build_vars
+        run: |
+          echo "image={{ `${{ secrets.EcrRepoUrl }}` }}:{{ .EnvPrefix }}-{{ .SlugName }}-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - uses: docker/setup-buildx-action@v2
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: {{ `${{ env.image }}` }}
