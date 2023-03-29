@@ -13,6 +13,13 @@ func checkError(err error) {
   if err != nil { panic(err) }
 }
 
+func createFolders(path string) {
+  cmd := exec.Command("mkdir", "-p", path)
+  fmt.Println("Creating directory:", path)
+  err := cmd.Run()
+  checkError(err)
+}
+
 func prefillRequiredData(svcDef *SvcDefinition) {
   svcDef.Name = strings.ReplaceAll(strings.ToLower(svcDef.Name), "_", "-")
   if (svcDef.Description == "") { svcDef.Description = "Generated via Tarkalabs IDP" }
@@ -25,6 +32,7 @@ func prefillRequiredData(svcDef *SvcDefinition) {
 }
 
 func generateKubernetesManifests(svcDef SvcDefinition) {
+  createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, "kubernetes"))
   tmplFiles, err := filepath.Glob(filepath.Join(os.Getenv("K8S_MANIFESTS_PATH"), svcDef.Language, "*.yml.tmpl"))
   checkError(err)
   for _, tmplFile := range tmplFiles {
@@ -39,6 +47,7 @@ func generateKubernetesManifests(svcDef SvcDefinition) {
 }
 
 func generateGithubWorkflow(svcDef SvcDefinition) {
+  createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, ".github", "workflows"))
   tmplFilePath := filepath.Join(os.Getenv("GITHUB_WORKFLOWS_PATH"), svcDef.Language, "deploy.yml.tmpl")
   tmpl, err := template.ParseFiles(tmplFilePath)
   checkError(err)
@@ -50,6 +59,7 @@ func generateGithubWorkflow(svcDef SvcDefinition) {
 }
 
 func copyRequiredFiles(svcDef SvcDefinition) {
+  createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name))
   filePaths, _ := filepath.Glob(filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language) + string(filepath.Separator) + "*")
   for _, filePath := range filePaths {
     fi, err := os.Lstat(filePath)
