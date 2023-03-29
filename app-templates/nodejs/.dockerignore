@@ -1,0 +1,12 @@
+.git
+.gitignore
+
+Dockerfile
+.dockerignore
+
+.npmrc
+node_modules
+npm-debug.log
+
+*.md
+**/coverage
