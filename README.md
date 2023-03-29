@@ -1,2 +1,3 @@
-# internal-developer-platform
-Internal Developer Platform
+# Internal Developer Platform by Tarkalabs
+
+Internal developer platform resources!
