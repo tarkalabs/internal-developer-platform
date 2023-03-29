@@ -30,7 +30,7 @@ func generateKubernetesManifests(svcDef SvcDefinition) {
   for _, tmplFile := range tmplFiles {
     tmpl, err := template.ParseFiles(tmplFile)
     checkError(err)
-    out, err := os.Create(filepath.Join(os.Getenv("OUTPUT_PATH"), "kubernetes", filepath.Base(tmplFile[:len(tmplFile)-5])))
+    out, err := os.Create(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, "kubernetes", filepath.Base(tmplFile[:len(tmplFile)-5])))
     checkError(err)
     err = tmpl.Execute(out, svcDef)
     checkError(err)
@@ -42,7 +42,7 @@ func generateGithubWorkflow(svcDef SvcDefinition) {
   tmplFilePath := filepath.Join(os.Getenv("GITHUB_WORKFLOWS_PATH"), svcDef.Language, "deploy.yml.tmpl")
   tmpl, err := template.ParseFiles(tmplFilePath)
   checkError(err)
-  out, err := os.Create(filepath.Join(os.Getenv("OUTPUT_PATH"), ".github", "workflows", filepath.Base(tmplFilePath[:len(tmplFilePath)-5])))
+  out, err := os.Create(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, ".github", "workflows", filepath.Base(tmplFilePath[:len(tmplFilePath)-5])))
   checkError(err)
   err = tmpl.Execute(out, svcDef)
   checkError(err)
@@ -58,14 +58,15 @@ func copyRequiredFiles(svcDef SvcDefinition) {
       fmt.Println("Copying file", filePath)
       data, err := os.ReadFile(filePath)
       checkError(err)
-      err = os.WriteFile(filepath.Join(os.Getenv("OUTPUT_PATH"), filepath.Base(filePath)), data, 0644)
+      err = os.WriteFile(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, filepath.Base(filePath)), data, 0644)
       checkError(err)
     }
   }
 
   fmt.Println("Copying", svcDef.Language, svcDef.MajorVersion, "version specific files...")
   appTemplatePath := filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language, svcDef.MajorVersion)
-  cmd := exec.Command("cp", "-rf", appTemplatePath + string(filepath.Separator), os.Getenv("OUTPUT_PATH"))
+  outputPath := filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name)
+  cmd := exec.Command("cp", "-rf", appTemplatePath + string(filepath.Separator), outputPath + string(filepath.Separator))
   fmt.Println(cmd)
   err := cmd.Run()
   checkError(err)
