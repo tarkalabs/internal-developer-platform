@@ -1,0 +1,116 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: new-product-pipeline
+  namespace: idp-platform-devops
+spec:
+  params:
+    - name: product_name
+      description: Name of the product
+    - name: product_slug_name
+      description: Short Product Name
+      default: ""
+    - name: environment
+      description: Product environment name i.e. staging, production etc.
+    - name: product_env_prefix
+      description: Product environment prefix to use for creating resources
+      default: ""
+    - name: predefined_template
+      description: Choose a predefined templates for product setup
+      default: ""
+    - name: microservices_json
+      description: Product's microservices configurations as a json string
+      default: "[]"
+    # Platform specific params
+    - name: idpGitRepoUrl
+      type: string
+      description: Internal developer platform git repo url
+      default: https://github.com/tarkalabs/internal-developer-platform
+    - name: idpGitRepoRevision
+      type: string
+      description: Cloud dev git repo revision(i.e. branch, tag, sha, ref, etc...) to use
+      default: dev
+
+  workspaces:
+    - name: global
+      description: Workspace to checkout git repositories into
+
+  tasks:
+    - name: clone-repo
+      workspaces:
+        - name: output
+          workspace: global
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: "$(params.idpGitRepoUrl)"
+        - name: revision
+          value: "$(params.idpGitRepoRevision)"
+        - name: depth
+          value: 1
+
+    - name: init-and-validate
+      runAfter:
+        - clone-repo
+      workspaces:
+        - name: global
+      taskSpec:
+        workspaces:
+          - name: global
+        params:
+          - name: predefined_template
+            default: "$(params.predefined_template)"
+          - name: microservices_json
+            default: "$(params.microservices_json)"
+        steps:
+          - name: init
+            image: golang:alpine
+            workingDir: $(workspaces.global.path)/scripts
+            script: |
+              printf '%s' "$MICROSERVICES_JSON" > microservices.json
+            env:
+              - name: MICROSERVICES_JSON
+                value: "$(params.microservices_json)"
+          - name: validate
+            image: golang:alpine
+            workingDir: $(workspaces.global.path)/scripts
+            script: |
+              go run resource-definitions.go new-product-validate.go
+            env:
+              - name: PREDEFINED_TEMPLATE
+                value: "$(params.predefined_template)"
+              - name: MICROSERVICES_JSON_FILE_PATH
+                value: microservices.json
+
+    - name: generate-resources
+      runAfter:
+        - init-and-validate
+      workspaces:
+        - name: global
+      taskSpec:
+        workspaces:
+          - name: global
+        params:
+          - name: predefined_template
+            default: "$(params.predefined_template)"
+        steps:
+          - name: k8s
+            image: golang:alpine
+            workingDir: $(workspaces.global.path)
+            script: |
+              rm -rf $OUTPUT_PATH/*
+              go run scripts/resource-definitions.go scripts/generate-resources.go
+            env:
+              - name: PREDEFINED_TEMPLATE
+                value: "$(params.predefined_template)"
+              - name: MICROSERVICES_JSON_FILE_PATH
+                value: scripts/microservices.json
+              - name: APP_TEMPLATES_PATH
+                value: "$(workspaces.global.path)/app-templates"
+              - name: K8S_MANIFESTS_PATH
+                value: "$(workspaces.global.path)/k8s-manifests"
+              - name: GITHUB_WORKFLOWS_PATH
+                value: "$(workspaces.global.path)/github-workflows"
+              - name: OUTPUT_PATH
+                value: "$(workspaces.global.path)/output"
