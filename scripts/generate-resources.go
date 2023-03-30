@@ -101,9 +101,10 @@ func main() {
     svcDefs                 = svcDefs[0:2]
   }
 
-  for _, svcDef := range svcDefs {
+  for i, svcDef := range svcDefs {
     fmt.Println("Generating resources for app:", svcDef.Name)
     prefillRequiredData(&svcDef)
+    svcDefs[i] = svcDef
     generateKubernetesManifests(svcDef)
     copyRequiredFiles(svcDef)
     fmt.Println("Generation of resources completed for app:", svcDef.Name)
@@ -111,6 +112,6 @@ func main() {
 
   servicesJson, err := json.Marshal(svcDefs)
   checkError(err)
-  err = os.WriteFile(os.Getenv("MICROSERVICES_JSON_FILE_PATH"), string(servicesJson), 0644)
+  err = os.WriteFile(os.Getenv("MICROSERVICES_JSON_FILE_PATH"), servicesJson, 0644)
   checkError(err)
 }
