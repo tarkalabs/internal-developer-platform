@@ -60,8 +60,11 @@ func generateGithubWorkflow(svcDef SvcDefinition) {
 
 func copyRequiredFiles(svcDef SvcDefinition) {
   createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name))
-  filePaths, _ := filepath.Glob(filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language) + string(filepath.Separator) + "*")
-  for _, filePath := range filePaths {
+  srcFolderPath := filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language) + string(filepath.Separator)
+  nonDotFilePaths, _ := filepath.Glob(srcFolderPath + "*")
+  dotFilePaths, _ := filepath.Glob(srcFolderPath + ".*")
+  allFilePaths := append(nonDotFilePaths, dotFilePaths...)
+  for _, filePath := range allFilePaths {
     fi, err := os.Lstat(filePath)
     checkError(err)
     if fi.Mode().IsRegular() {
