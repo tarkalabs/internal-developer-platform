@@ -46,6 +46,7 @@ func generateKubernetesManifests(svcDef SvcDefinition) {
   }
 }
 
+// Not being used right now
 func generateGithubWorkflow(svcDef SvcDefinition) {
   createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, ".github", "workflows"))
   tmplFilePath := filepath.Join(os.Getenv("GITHUB_WORKFLOWS_PATH"), svcDef.Language, "deploy.yml.tmpl")
@@ -60,11 +61,8 @@ func generateGithubWorkflow(svcDef SvcDefinition) {
 
 func copyRequiredFiles(svcDef SvcDefinition) {
   createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name))
-  srcFolderPath := filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language) + string(filepath.Separator)
-  nonDotFilePaths, _ := filepath.Glob(srcFolderPath + "*")
-  dotFilePaths, _ := filepath.Glob(srcFolderPath + ".*")
-  allFilePaths := append(nonDotFilePaths, dotFilePaths...)
-  for _, filePath := range allFilePaths {
+  filePaths, _ := filepath.Glob(filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language) + string(filepath.Separator) + "*")
+  for _, filePath := range filePaths {
     fi, err := os.Lstat(filePath)
     checkError(err)
     if fi.Mode().IsRegular() {
@@ -106,7 +104,6 @@ func main() {
   for _, svcDef := range svcDefs {
     fmt.Println("Generating resources for app:", svcDef.Name)
     prefillRequiredData(&svcDef)
-    generateGithubWorkflow(svcDef)
     generateKubernetesManifests(svcDef)
     copyRequiredFiles(svcDef)
     fmt.Println("Generation of resources completed for app:", svcDef.Name)
