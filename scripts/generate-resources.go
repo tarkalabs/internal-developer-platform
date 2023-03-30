@@ -108,4 +108,9 @@ func main() {
     copyRequiredFiles(svcDef)
     fmt.Println("Generation of resources completed for app:", svcDef.Name)
   }
+
+  servicesJson, err := json.Marshal(svcDefs)
+  checkError(err)
+  err = os.WriteFile(os.Getenv("MICROSERVICES_JSON_FILE_PATH"), string(servicesJson), 0644)
+  checkError(err)
 }
