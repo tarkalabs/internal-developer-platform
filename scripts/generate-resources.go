@@ -28,7 +28,15 @@ func prefillRequiredData(svcDef *SvcDefinition) {
   if (svcDef.GitBranch == "") { svcDef.GitBranch = "main" }
   if (svcDef.Environment == "") { svcDef.Environment = "production" }
   if (svcDef.EnvPrefix == "") { svcDef.EnvPrefix = svcDef.Environment }
-  svcDef.Namespace = svcDef.EnvPrefix + "-" + svcDef.SlugName
+
+  svcDef.ProductName = strings.ReplaceAll(strings.ToLower(svcDef.ProductName), "_", "-")
+  svcDef.Namespace = svcDef.EnvPrefix + "-" + svcDef.ProductName
+  svcDef.Domain = strings.ToLower(svcDef.Namespace) + "." + os.Getenv("BASE_DOMAIN")
+  if strings.ToLower(svcDef.Type) == "frontend" {
+    svcDef.HttpPath = "/"
+  } else {
+    svcDef.HttpPath = "/api/"
+  }
 }
 
 func generateKubernetesManifests(svcDef SvcDefinition) {
@@ -59,6 +67,13 @@ func generateGithubWorkflow(svcDef SvcDefinition) {
   out.Close()
 }
 
+func runSystemCommand(name string, arg ...string) {
+  cmd := exec.Command(name, arg...)
+  fmt.Println(cmd)
+  err := cmd.Run()
+  checkError(err)
+}
+
 func copyRequiredFiles(svcDef SvcDefinition) {
   createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name))
   filePaths, _ := filepath.Glob(filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language) + string(filepath.Separator) + "*")
@@ -77,10 +92,7 @@ func copyRequiredFiles(svcDef SvcDefinition) {
   fmt.Println("Copying", svcDef.Language, svcDef.MajorVersion, "version specific files...")
   appTemplatePath := filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language, svcDef.MajorVersion)
   outputPath := filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name)
-  cmd := exec.Command("cp", "-rf", appTemplatePath + string(filepath.Separator), outputPath + string(filepath.Separator))
-  fmt.Println(cmd)
-  err := cmd.Run()
-  checkError(err)
+  runSystemCommand("cp", "-rf", appTemplatePath + string(filepath.Separator), outputPath + string(filepath.Separator))
 }
 
 func main() {
@@ -94,13 +106,18 @@ func main() {
     defs := strings.Split(predefinedTemplate, "|")
     frontend_def := strings.Split(defs[0], ":")
     backend_def  := strings.Split(defs[1], ":")
+    svcDefs[0].Type         = "frontend"
     svcDefs[0].Language     = frontend_def[0]
     svcDefs[0].MajorVersion = frontend_def[1]
+    svcDefs[1].Type         = "backend"
     svcDefs[1].Language     = backend_def[0]
     svcDefs[1].MajorVersion = backend_def[1]
     svcDefs                 = svcDefs[0:2]
   }
-
+  fmt.Println("Clearing contents of output folder", os.Getenv("OUTPUT_PATH"))
+  outputPath := os.Getenv("OUTPUT_PATH")
+  if ! strings.HasSuffix(outputPath, "/") { outputPath += "/" }
+  runSystemCommand("rm", "-rf", outputPath)
   for i, svcDef := range svcDefs {
     fmt.Println("Generating resources for app:", svcDef.Name)
     prefillRequiredData(&svcDef)

@@ -4,6 +4,7 @@ import (
   "os"
   "strings"
   "encoding/json"
+  "regexp"
 )
 
 func containsStringArray(arr []string, target string) bool {
@@ -24,8 +25,12 @@ func validateMicroservicesDefinitions(svcDefs []SvcDefinition) bool {
     fmt.Println("Validating app definition:", string(svcJson))
     if strings.TrimSpace(svcDef.Name) == "" {
       panic("One of the app definitions doesn't have `name` defined!")
+    } else if strings.TrimSpace(svcDef.ProductName) == "" {
+      panic(svcDef.Name + " app definition doesn't have `product_name` defined!")
+    } else if strings.TrimSpace(svcDef.Type) == "" {
+      panic(svcDef.Name + " app definition doesn't have `type` defined!")
     } else if strings.TrimSpace(svcDef.Language) == "" {
-        panic(svcDef.Name + " app definition doesn't have `language` defined!")
+      panic(svcDef.Name + " app definition doesn't have `language` defined!")
     } else if strings.TrimSpace(svcDef.MajorVersion) == "" {
       panic(svcDef.Name + " app definition doesn't have `major_version` defined!")
     } else if strings.TrimSpace(svcDef.GitRepo) == "" {
@@ -33,6 +38,16 @@ func validateMicroservicesDefinitions(svcDefs []SvcDefinition) bool {
     } else if strings.TrimSpace(svcDef.GithubDeployKey) == "" {
       panic(svcDef.Name + " app definition doesn't have `github_deploy_key` defined!")
     } else {
+      namePattern := "[a-zA-Z0-9_-]+"
+      patternCompile := regexp.MustCompile(namePattern)
+      if ! patternCompile.MatchString(svcDef.Name) {
+        panic(svcDef.Name + " app name isn't following required naming convention: " + namePattern)
+      } else if ! patternCompile.MatchString(svcDef.SlugName) {
+        panic(svcDef.Name + " app slug name isn't following required naming convention: " + namePattern)
+      } else if ! patternCompile.MatchString(svcDef.ProductName) {
+        panic(svcDef.Name + " app product name isn't following required naming convention: " + namePattern)
+      }
+
       if _, ok := SupportedTemplates[svcDef.Language]; ok {
         if containsStringArray(SupportedTemplates[svcDef.Language], svcDef.MajorVersion) {
           fmt.Printf("Microservice %s validation successful!\n", svcDef.Name)
@@ -62,8 +77,10 @@ func main() {
       defs := strings.Split(predefinedTemplate, "|")
       frontend_def := strings.Split(defs[0], ":")
       backend_def  := strings.Split(defs[1], ":")
+      svcDefs[0].Type         = "frontend"
       svcDefs[0].Language     = frontend_def[0]
       svcDefs[0].MajorVersion = frontend_def[1]
+      svcDefs[1].Type         = "backend"
       svcDefs[1].Language     = backend_def[0]
       svcDefs[1].MajorVersion = backend_def[1]
       svcDefs = svcDefs[0:2]

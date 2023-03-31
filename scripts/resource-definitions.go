@@ -10,8 +10,10 @@ var SupportedPredefinedTemplates = []string{
 }
 
 type SvcDefinition struct {
+  Type string `json:"type"`
   Language string `json:"language"`
   MajorVersion string `json:"major_version"`
+  ProductName string `json:"product_name"`
   Name string `json:"name"`
   SlugName string `json:"slug_name"`
   Environment string `json:"environment"`
@@ -23,4 +25,6 @@ type SvcDefinition struct {
   DBConnString string `json:"db_conn_string"`
   // below attributes will get overridden while generating sources
   Namespace string `json:"image"`
+  Domain string `json:"domain"`
+  HttpPath string `json:"http_path"`
 }
