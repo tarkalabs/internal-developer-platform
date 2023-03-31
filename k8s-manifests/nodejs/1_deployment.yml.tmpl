@@ -19,20 +19,25 @@ spec:
       - name: app
         image: {{ .Name }}:latest
         ports:
-        - name: http-port
+        - name: app-port
           containerPort: 3000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200M
+          limits:
+            cpu: 200m
+            memory: 300M
         livenessProbe:
           tcpSocket:
-            port: http-port
+            port: app-port
           initialDelaySeconds: 5
           periodSeconds: 5
           failureThreshold: 12 # 1 minute
         readinessProbe:
           httpGet:
             path: /health
-            port: http-port
+            port: app-port
           initialDelaySeconds: 10
           periodSeconds: 15
           failureThreshold: 4 # 1 minute
-        securityContext:
-          runAsNonRoot: true
