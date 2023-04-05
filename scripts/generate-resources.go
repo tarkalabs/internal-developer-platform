@@ -6,6 +6,7 @@ import (
   "os/exec"
   "path/filepath"
   "encoding/json"
+  "text/template"
   "math/rand"
 	"time"
 )
