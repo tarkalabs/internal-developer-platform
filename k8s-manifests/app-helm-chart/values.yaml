@@ -5,6 +5,10 @@ environment: production
 envPrefix: prod
 namespace: internal-developer-platform
 
+create:
+  app_resources: true
+  tekton_resources: true
+
 deployment:
   replicas: 1
   revisionHistoryLimit: 3

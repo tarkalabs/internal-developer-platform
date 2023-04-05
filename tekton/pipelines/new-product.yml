@@ -7,9 +7,8 @@ spec:
   params:
     - name: product_name
       description: Name of the product
-    - name: product_slug_name
-      description: Short Product Name
-      default: ""
+    - name: base_domain
+      description: Route53 domain name
     - name: environment
       description: Product environment name i.e. staging, production etc.
     - name: product_env_prefix
@@ -92,6 +91,10 @@ spec:
         workspaces:
           - name: global
         params:
+          - name: product_name
+            default: "$(params.product_name)"
+          - name: base_domain
+            default: "$(params.base_domain)"
           - name: predefined_template
             default: "$(params.predefined_template)"
         steps:
@@ -102,6 +105,10 @@ spec:
               rm -rf $OUTPUT_PATH/*
               go run scripts/resource-definitions.go scripts/generate-resources.go
             env:
+              - name: ProductName
+                value: "$(params.product_name)"
+              - name: BASE_DOMAIN
+                value: "$(params.base_domain)"
               - name: PREDEFINED_TEMPLATE
                 value: "$(params.predefined_template)"
               - name: MICROSERVICES_JSON_FILE_PATH

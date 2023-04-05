@@ -1,3 +1,4 @@
+{{- if .Values.create.tekton_resources -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -59,3 +60,4 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: tekton-triggers-ro
+{{- end -}}

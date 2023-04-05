@@ -1,3 +1,4 @@
+{{- if .Values.create.app_resources -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,3 +22,4 @@ spec:
               containerPort: {{ .Values.deployment.container.port }}
 {{ include "container.resources" .Values.deployment.container | indent 10 }}
 {{ include "container.probes" .Values.deployment.container | indent 10 }}
+{{- end -}}

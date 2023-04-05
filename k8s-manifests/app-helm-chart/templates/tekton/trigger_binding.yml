@@ -1,3 +1,4 @@
+{{- if .Values.create.tekton_resources -}}
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
@@ -13,3 +14,4 @@ spec:
       value: $(body.repository.full_name)
     - name: repoHtmlUrl
       value: $(body.repository.html_url)
+{{- end -}}

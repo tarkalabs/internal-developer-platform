@@ -1,3 +1,4 @@
+{{- if .Values.create.tekton_resources -}}
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
@@ -24,3 +25,4 @@ spec:
         - ref: github-binding
       template:
         ref: {{ template "tekton.tt.github.push.name" . }}
+{{- end -}}
