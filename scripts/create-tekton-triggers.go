@@ -4,9 +4,7 @@ import (
   "os"
   "strings"
   "os/exec"
-  "path/filepath"
   "encoding/json"
-  "text/template"
 )
 
 func checkError(err error) {
@@ -26,10 +24,10 @@ func main() {
   var svcDefs []SvcDefinition
   if err := json.Unmarshal([]byte(svcData), &svcDefs); err != nil { panic(err) }
 
-  for i, svcDef := range svcDefs {
+  for _, svcDef := range svcDefs {
     fmt.Println("Creating tekton trigger for app:", svcDef.Name)
     helm_cmd := fmt.Sprintf("helm install --wait --name %s-%s-tekton", svcDef.EnvPrefix, svcDef.SlugName)
-    helm_args := join([
+    helm_args := strings.Join([] string {
       fmt.Sprintf("--set create.app_resources=false"),
       fmt.Sprintf("--set productName=%s", svcDef.ProductName),
       fmt.Sprintf("--set appName=%s", svcDef.Name),
@@ -38,10 +36,10 @@ func main() {
       fmt.Sprintf("--set envPrefix=%s", svcDef.EnvPrefix),
       fmt.Sprintf("--set webhooks.github.token=%s", svcDef.GithubSecretToken),
       fmt.Sprintf("--set tekton.domain=hooks.%s", svcDef.Domain),
-      fmt.Sprintf("--set tekton.triggerTemplate=tekton-%s-pipeline", svcDef.Type),
+      fmt.Sprintf("--set tekton.triggerTemplate=tekton-%s-pipeline", svcDef.Language),
       fmt.Sprintf("--set tekton.namespace=%s", os.Getenv("TEKTON_NAMESPACE")),
-    ], " ")
-    fmt.Println(cmd)
+    }, " ")
+    runSystemCommand(helm_cmd, helm_args)
     fmt.Println("Tekton resources created successfully")
   }
 }
