@@ -1,0 +1,15 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: github-binding
+  namespace: {{ .Values.tekton.namespace }}
+spec:
+  params:
+    - name: branch
+      value: $(body.extensions.branch)
+    - name: gitShortSha
+      value: $(body.extensions.head_short_sha)
+    - name: repoFullName
+      value: $(body.repository.full_name)
+    - name: repoHtmlUrl
+      value: $(body.repository.html_url)

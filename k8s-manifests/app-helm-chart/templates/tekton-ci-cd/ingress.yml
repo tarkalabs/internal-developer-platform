@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ template "tekton.ingress.name" . }}
+  namespace: {{ .Values.tekton.namespace }}
+  labels: {{ include "common.labels" . | nindent 4 }}
+  annotations: {{ (toYaml .Values.tekton.ingress.annotations) | nindent 4 }}
+spec:
+  rules:
+    - host: {{ .Values.tekton.ingress.domain }}
+      http:
+        paths:
+        - path: {{ template "tekton.ingress.path" . }}
+          pathType: Exact
+          backend:
+            service:
+              name: {{ template "tekton.event-listener.name" . }}
+              port:
+                number: {{ .Values.tekton.ingress.port }}

@@ -1,0 +1,73 @@
+productName: internal-developer-platform
+appName: internal-developer-platform-api
+appSlugName: idp-api
+environment: production
+envPrefix: prod
+namespace: internal-developer-platform
+
+deployment:
+  replicas: 1
+  revisionHistoryLimit: 3
+  container:
+    image: nginx:latest
+    port: 80
+    resources:
+      requests:
+        cpu: 100m
+        memory: 200M
+      limits:
+        cpu: 200m
+        memory: 300M
+    livenessProbe:
+      tcpSocket:
+        port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 12 # 1 minute
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 80
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      failureThreshold: 4 # 1 minute
+
+service:
+  type: ClusterIP
+  port: 80
+
+defaultAnnotations: &defaultAnnotations
+  kubernetes.io/ingress.class: shared-alb
+  alb.ingress.kubernetes.io/target-type: ip
+  alb.ingress.kubernetes.io/group.name: shared-alb
+  alb.ingress.kubernetes.io/success-codes: '200'
+  alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+  alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS": 443}]'
+  alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+  alb.ingress.kubernetes.io/unhealthy-threshold-count: '3'
+  alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '10'
+  alb.ingress.kubernetes.io/healthcheck-interval-seconds: '20'
+  alb.ingress.kubernetes.io/target-group-attributes: |
+    deregistration_delay.timeout_seconds=10,load_balancing.algorithm.type=least_outstanding_requests
+
+ingress:
+  domain: prod-idp.dev.klstr.io
+  httpPathPrefix: /api/
+  annotations:
+    <<: *defaultAnnotations
+    alb.ingress.kubernetes.io/healthcheck-path: /
+
+webhooks:
+  github:
+    token: xxx
+
+tekton:
+  triggerTemplate: ""
+  prefix: tekton
+  namespace: tekton-pipelines
+  ingress:
+    port: 8080
+    domain: hooks.dev.klstr.io
+    annotations:
+      <<: *defaultAnnotations
+      alb.ingress.kubernetes.io/healthcheck-path: /live

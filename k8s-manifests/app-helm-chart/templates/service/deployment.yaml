@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "deployment.name" . }}
+  namespace: {{ .Values.namespace }}
+  labels: {{ include "common.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  revisionHistoryLimit: {{ .Values.deployment.revisionHistoryLimit }}
+  selector:
+    matchLabels: {{ include "common.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{ include "common.labels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: main
+          image: {{ .Values.deployment.container.image }}
+          ports:
+            - name: traffic-port
+              containerPort: {{ .Values.deployment.container.port }}
+{{ include "container.resources" .Values.deployment.container | indent 10 }}
+{{ include "container.probes" .Values.deployment.container | indent 10 }}
