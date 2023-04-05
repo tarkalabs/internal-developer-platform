@@ -12,7 +12,7 @@ func checkError(err error) {
 }
 
 func runSystemCommand(name string, arg ...string) {
-  cmd := exec.Command(name, arg...)
+  cmd := exec.Command("sh", "-c", name, arg...)
   fmt.Println(cmd)
   err := cmd.Run()
   checkError(err)
