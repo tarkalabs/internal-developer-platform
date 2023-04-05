@@ -27,4 +27,5 @@ type SvcDefinition struct {
   Namespace string `json:"image"`
   Domain string `json:"domain"`
   HttpPath string `json:"http_path"`
+  GithubSecretToken string `json:"github_secret_token"`
 }

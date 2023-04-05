@@ -6,11 +6,19 @@ import (
   "os/exec"
   "path/filepath"
   "encoding/json"
-  "text/template"
+  "math/rand"
+	"time"
 )
 
 func checkError(err error) {
   if err != nil { panic(err) }
+}
+
+func randomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
+	b := make([]byte, length+2)
+	rand.Read(b)
+	return fmt.Sprintf("%x", b)[2 : length+2]
 }
 
 func createFolders(path string) {
@@ -37,8 +45,12 @@ func prefillRequiredData(svcDef *SvcDefinition) {
   } else {
     svcDef.HttpPath = "/api/"
   }
+
+  // Generating random github secret token
+  svcDef.GithubSecretToken = randomString(10)
 }
 
+// Not being used right now
 func generateKubernetesManifests(svcDef SvcDefinition) {
   createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, "kubernetes"))
   tmplFiles, err := filepath.Glob(filepath.Join(os.Getenv("K8S_MANIFESTS_PATH"), svcDef.Language, "*.yml.tmpl"))
@@ -122,7 +134,6 @@ func main() {
     fmt.Println("Generating resources for app:", svcDef.Name)
     prefillRequiredData(&svcDef)
     svcDefs[i] = svcDef
-    generateKubernetesManifests(svcDef)
     copyRequiredFiles(svcDef)
     fmt.Println("Generation of resources completed for app:", svcDef.Name)
   }
