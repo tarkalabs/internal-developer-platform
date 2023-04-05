@@ -48,6 +48,10 @@ func validateMicroservicesDefinitions(svcDefs []SvcDefinition) bool {
         panic(svcDef.Name + " app product name isn't following required naming convention: " + namePattern)
       }
 
+      if ! strings.Contains(svcDef.GitRepo, "github.com") {
+        panic(svcDef.Name + " app's git repo is not yet supported!")
+      }
+
       if _, ok := SupportedTemplates[svcDef.Language]; ok {
         if containsStringArray(SupportedTemplates[svcDef.Language], svcDef.MajorVersion) {
           fmt.Printf("Microservice %s validation successful!\n", svcDef.Name)
