@@ -67,7 +67,6 @@ webhooks:
 
 tekton:
   triggerTemplate: ""
-  prefix: tekton
   namespace: tekton-pipelines
   ingress:
     port: 8080
