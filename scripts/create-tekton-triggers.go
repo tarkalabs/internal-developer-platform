@@ -37,7 +37,7 @@ func main() {
       fmt.Sprintf("--set tekton.domain=hooks.%s", svcDef.Domain),
       fmt.Sprintf("--set tekton.triggerTemplate=tekton-%s-pipeline", svcDef.Language),
       fmt.Sprintf("--set tekton.namespace=%s", os.Getenv("TEKTON_NAMESPACE")),
-      os.Getenv("HELM_CHART_PATH")
+      os.Getenv("HELM_CHART_PATH"),
     }
     runSystemCommand("helm", helm_args...)
     fmt.Println("Tekton resources created successfully")
