@@ -5,6 +5,7 @@ metadata:
   namespace: idp-platform-devops
 spec:
   params:
+    # product specific params
     - name: product_name
       description: Name of the product
     - name: base_domain
@@ -20,32 +21,48 @@ spec:
     - name: microservices_json
       description: Product's microservices configurations as a json string
       default: "[]"
+
+    # kubernetes specific params
+    - name: aws_region
+      description: AWS Region
+      default: us-east-1
+    - name: eks_cluster_name
+      description: Name of the EKS cluster to create resources against
+
     # Platform specific params
-    - name: idpGitRepoUrl
+    - name: idp_git_repo_url
       type: string
       description: Internal developer platform git repo url
       default: https://github.com/tarkalabs/internal-developer-platform
-    - name: idpGitRepoRevision
+    - name: idp_git_repo_revision
       type: string
       description: Cloud dev git repo revision(i.e. branch, tag, sha, ref, etc...) to use
       default: dev
+    - name: idp_base_image
+      type: string
+      description: Base image to use for all the tasks
+      default: 260741046218.dkr.ecr.us-east-1.amazonaws.com/idp:base-v3
+    - name: idp_platform_namespace
+      type: string
+      description: Platform namespace to create tekton resources in
+      default: idp-platform-devops
 
   workspaces:
-    - name: global
+    - name: shared
       description: Workspace to checkout git repositories into
 
   tasks:
     - name: clone-repo
       workspaces:
         - name: output
-          workspace: global
+          workspace: shared
       taskRef:
         name: git-clone
       params:
         - name: url
-          value: "$(params.idpGitRepoUrl)"
+          value: "$(params.idp_git_repo_url)"
         - name: revision
-          value: "$(params.idpGitRepoRevision)"
+          value: "$(params.idp_git_repo_revision)"
         - name: depth
           value: 1
 
@@ -53,27 +70,37 @@ spec:
       runAfter:
         - clone-repo
       workspaces:
-        - name: global
+        - name: shared
       taskSpec:
         workspaces:
-          - name: global
+          - name: shared
         params:
+          - name: idp_base_image
+            default: "$(params.idp_base_image)"
+          - name: aws_region
+            default: "$(params.aws_region)"
+          - name: eks_cluster_name
+            default: "$(params.eks_cluster_name)"
           - name: predefined_template
             default: "$(params.predefined_template)"
           - name: microservices_json
             default: "$(params.microservices_json)"
         steps:
           - name: init
-            image: golang:alpine
-            workingDir: $(workspaces.global.path)/scripts
+            image: "$(params.idp_base_image)"
+            workingDir: $(workspaces.shared.path)/scripts
             script: |
               printf '%s' "$MICROSERVICES_JSON" > microservices.json
+              aws eks update-kubeconfig --region "$(params.aws_region)" --name "$(params.eks_cluster_name)"
+              chmod 400 "$KUBECONFIG"
             env:
               - name: MICROSERVICES_JSON
                 value: "$(params.microservices_json)"
+              - name: KUBECONFIG
+                value: $(workspaces.shared.path)/.kubeconfig
           - name: validate
-            image: golang:alpine
-            workingDir: $(workspaces.global.path)/scripts
+            image: "$(params.idp_base_image)"
+            workingDir: $(workspaces.shared.path)/scripts
             script: |
               go run resource-definitions.go new-product-validate.go
             env:
@@ -86,11 +113,13 @@ spec:
       runAfter:
         - init-and-validate
       workspaces:
-        - name: global
+        - name: shared
       taskSpec:
         workspaces:
-          - name: global
+          - name: shared
         params:
+          - name: idp_base_image
+            default: "$(params.idp_base_image)"
           - name: product_name
             default: "$(params.product_name)"
           - name: base_domain
@@ -98,9 +127,9 @@ spec:
           - name: predefined_template
             default: "$(params.predefined_template)"
         steps:
-          - name: k8s
-            image: golang:alpine
-            workingDir: $(workspaces.global.path)
+          - name: generate-files
+            image: "$(params.idp_base_image)"
+            workingDir: $(workspaces.shared.path)
             script: |
               rm -rf $OUTPUT_PATH/*
               go run scripts/resource-definitions.go scripts/generate-resources.go
@@ -114,10 +143,43 @@ spec:
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
               - name: APP_TEMPLATES_PATH
-                value: "$(workspaces.global.path)/app-templates"
+                value: "$(workspaces.shared.path)/app-templates"
               - name: K8S_MANIFESTS_PATH
-                value: "$(workspaces.global.path)/k8s-manifests"
+                value: "$(workspaces.shared.path)/k8s-manifests"
               - name: GITHUB_WORKFLOWS_PATH
-                value: "$(workspaces.global.path)/github-workflows"
+                value: "$(workspaces.shared.path)/github-workflows"
               - name: OUTPUT_PATH
-                value: "$(workspaces.global.path)/output"
+                value: "$(workspaces.shared.path)/output"
+
+    - name: create-tekton-resources
+      runAfter:
+        - generate-resources
+      workspaces:
+        - name: shared
+      taskSpec:
+        workspaces:
+          - name: shared
+        params:
+          - name: idp_base_image
+            default: "$(params.idp_base_image)"
+          - name: idp_platform_namespace
+            default: "$(params.idp_platform_namespace)"
+          - name: product_name
+            default: "$(params.product_name)"
+          - name: base_domain
+            default: "$(params.base_domain)"
+        steps:
+          - name: helm-install
+            image: "$(params.idp_base_image)"
+            workingDir: $(workspaces.shared.path)
+            script: |
+              go run scripts/resource-definitions.go scripts/create-tekton-triggers.go
+            env:
+              - name: MICROSERVICES_JSON_FILE_PATH
+                value: scripts/microservices.json
+              - name: TEKTON_NAMESPACE
+                value: $(params.idp_platform_namespace)
+              - name: HELM_CHART_PATH
+                value: $(workspaces.shared.path)/kubernetes/app-helm-chart/
+              - name: KUBECONFIG
+                value: $(workspaces.shared.path)/.kubeconfig
