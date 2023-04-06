@@ -46,10 +46,14 @@ spec:
       type: string
       description: Platform namespace to create tekton resources in
       default: idp-platform-devops
+    - name: idp_platform_tekton_namespace
+      type: string
+      description: Platform namespace to create tekton resources in
+      default: tekton-pipelines
     - name: idp_platform_debug_mode
-      type: bool
+      type: string
       description: Enable platform debug mode for testing
-      default: false
+      default: "false"
 
   workspaces:
     - name: shared
@@ -166,9 +170,9 @@ spec:
         params:
           - name: idp_base_image
             default: "$(params.idp_base_image)"
-          - name: idp_platform_namespace
-            default: "$(params.idp_platform_namespace)"
-          - name: debug_mode
+          - name: idp_platform_tekton_namespace
+            default: "$(params.idp_platform_tekton_namespace)"
+          - name: idp_platform_debug_mode
             default: "$(params.idp_platform_debug_mode)"
           - name: product_name
             default: "$(params.product_name)"
@@ -184,9 +188,9 @@ spec:
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
               - name: TEKTON_NAMESPACE
-                value: "$(params.idp_platform_namespace)"
+                value: "$(params.idp_platform_tekton_namespace)"
               - name: DEBUG_MODE
-                value: "$(params.debug_mode)"
+                value: "$(params.idp_platform_debug_mode)"
               - name: HELM_CHART_PATH
                 value: "$(workspaces.shared.path)/kubernetes/app-helm-chart/"
               - name: KUBECONFIG
