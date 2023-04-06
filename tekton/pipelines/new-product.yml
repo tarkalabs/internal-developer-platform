@@ -21,6 +21,8 @@ spec:
     - name: microservices_json
       description: Product's microservices configurations as a json string
       default: "[]"
+    - name: github_webhook_access_token
+      description: Github PAT which has access to create webhooks for repositories
 
     # kubernetes specific params
     - name: aws_region
@@ -31,27 +33,21 @@ spec:
 
     # Platform specific params
     - name: idp_git_repo_url
-      type: string
       description: Internal developer platform git repo url
       default: https://github.com/tarkalabs/internal-developer-platform
     - name: idp_git_repo_revision
-      type: string
       description: Cloud dev git repo revision(i.e. branch, tag, sha, ref, etc...) to use
       default: dev
     - name: idp_base_image
-      type: string
       description: Base image to use for all the tasks
       default: 260741046218.dkr.ecr.us-east-1.amazonaws.com/idp:base-v3
     - name: idp_platform_namespace
-      type: string
       description: Platform namespace to create tekton resources in
       default: idp-platform-devops
     - name: idp_platform_tekton_namespace
-      type: string
       description: Platform namespace to create tekton resources in
       default: tekton-pipelines
     - name: idp_platform_debug_mode
-      type: string
       description: Enable platform debug mode for testing
       default: "false"
 
@@ -93,19 +89,17 @@ spec:
             default: "$(params.predefined_template)"
           - name: microservices_json
             default: "$(params.microservices_json)"
+          - name: github_webhook_access_token
+            default: "$(params.github_webhook_access_token)"
         steps:
           - name: init
             image: "$(params.idp_base_image)"
             workingDir: $(workspaces.shared.path)/scripts
             script: |
               printf '%s' "$MICROSERVICES_JSON" > microservices.json
-              aws eks update-kubeconfig --region "$(params.aws_region)" --name "$(params.eks_cluster_name)"
-              chmod 400 "$KUBECONFIG"
             env:
               - name: MICROSERVICES_JSON
                 value: "$(params.microservices_json)"
-              - name: KUBECONFIG
-                value: $(workspaces.shared.path)/.kubeconfig
           - name: validate
             image: "$(params.idp_base_image)"
             workingDir: $(workspaces.shared.path)/scripts
@@ -116,6 +110,8 @@ spec:
                 value: "$(params.predefined_template)"
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: microservices.json
+              - name: GITHUB_WEBHOOK_ACCESS_TOKEN
+                value: "$(params.github_webhook_access_token)"
 
     - name: generate-resources
       runAfter:
@@ -134,6 +130,8 @@ spec:
             default: "$(params.base_domain)"
           - name: predefined_template
             default: "$(params.predefined_template)"
+          - name: github_webhook_access_token
+            default: "$(params.github_webhook_access_token)"
         steps:
           - name: generate-files
             image: "$(params.idp_base_image)"
@@ -150,6 +148,8 @@ spec:
                 value: "$(params.predefined_template)"
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
+              - name: GITHUB_WEBHOOK_ACCESS_TOKEN
+                value: "$(params.github_webhook_access_token)"
               - name: APP_TEMPLATES_PATH
                 value: "$(workspaces.shared.path)/app-templates"
               - name: K8S_MANIFESTS_PATH
@@ -193,5 +193,3 @@ spec:
                 value: "$(params.idp_platform_debug_mode)"
               - name: HELM_CHART_PATH
                 value: "$(workspaces.shared.path)/kubernetes/app-helm-chart/"
-              - name: KUBECONFIG
-                value: "$(workspaces.shared.path)/.kubeconfig"
