@@ -60,6 +60,9 @@ func main() {
       fmt.Sprintf("tekton.namespace=%s", os.Getenv("TEKTON_NAMESPACE")),
       os.Getenv("HELM_CHART_PATH"),
     }
+    if os.Getenv("DEBUG_MODE") == "true" {
+      helm_args = append(helm_args, "--debug")
+    }
     runSystemCommand("helm", helm_args...)
     fmt.Println("Tekton resources created successfully")
   }
