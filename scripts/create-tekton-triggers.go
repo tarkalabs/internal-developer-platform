@@ -26,7 +26,7 @@ func main() {
   for _, svcDef := range svcDefs {
     fmt.Println("Creating tekton trigger for app:", svcDef.Name)
     helm_args := []string {
-      fmt.Sprintf("install --wait --name %s-%s-tekton", svcDef.EnvPrefix, svcDef.SlugName),
+      fmt.Sprintf("install --wait %s-%s-tekton", svcDef.EnvPrefix, svcDef.SlugName),
       fmt.Sprintf("--set create.app_resources=false"),
       fmt.Sprintf("--set productName=%s", svcDef.ProductName),
       fmt.Sprintf("--set appName=%s", svcDef.Name),
@@ -37,6 +37,7 @@ func main() {
       fmt.Sprintf("--set tekton.domain=hooks.%s", svcDef.Domain),
       fmt.Sprintf("--set tekton.triggerTemplate=tekton-%s-pipeline", svcDef.Language),
       fmt.Sprintf("--set tekton.namespace=%s", os.Getenv("TEKTON_NAMESPACE")),
+      os.Getenv("HELM_CHART_PATH")
     }
     runSystemCommand("helm", helm_args...)
     fmt.Println("Tekton resources created successfully")
