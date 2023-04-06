@@ -47,8 +47,10 @@ func prefillRequiredData(svcDef *SvcDefinition) {
     svcDef.HttpPath = "/api/"
   }
 
-  // Generating random github secret token
   svcDef.GithubSecretToken = randomString(10)
+  if strings.TrimSpace(svcDef.GithubWebhookPAT) == "" {
+    svcDef.GithubWebhookPAT = os.Getenv("GITHUB_WEBHOOK_ACCESS_TOKEN")
+  }
   svcDef.GithubWebhookDomain = "hooks." + os.Getenv("BASE_DOMAIN")
   svcDef.GithubWebhookPathPrefix = "/" + svcDef.Namespace + "/" + svcDef.EnvPrefix + "-" + svcDef.SlugName
 }

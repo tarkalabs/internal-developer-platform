@@ -37,6 +37,8 @@ func validateMicroservicesDefinitions(svcDefs []SvcDefinition) bool {
       panic(svcDef.Name + " app definition doesn't have `git_repo` defined!")
     } else if strings.TrimSpace(svcDef.GithubDeployKey) == "" {
       panic(svcDef.Name + " app definition doesn't have `github_deploy_key` defined!")
+    } else if strings.TrimSpace(svcDef.GithubWebhookPAT + os.Getenv("GITHUB_WEBHOOK_ACCESS_TOKEN")) == "" {
+      panic(svcDef.Name + " app definition doesn't have `github_webhook_pat` defined!")
     } else {
       namePattern := "[a-zA-Z0-9_-]+"
       patternCompile := regexp.MustCompile(namePattern)
