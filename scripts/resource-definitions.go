@@ -24,7 +24,7 @@ type SvcDefinition struct {
   GithubDeployKey string `json:"github_deploy_key"`
   DBConnString string `json:"db_conn_string"`
   // below attributes will get overridden while generating sources
-  Namespace string `json:"image"`
+  Namespace string `json:"namespace"`
   Domain string `json:"domain"`
   HttpPath string `json:"http_path"`
   GithubSecretToken string `json:"github_secret_token"`
