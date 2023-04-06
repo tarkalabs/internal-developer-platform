@@ -193,3 +193,30 @@ spec:
                 value: "$(params.idp_platform_debug_mode)"
               - name: HELM_CHART_PATH
                 value: "$(workspaces.shared.path)/kubernetes/app-helm-chart/"
+
+    - name: create-webhook-and-git-push-resources
+      runAfter:
+        - create-tekton-resources
+      workspaces:
+        - name: shared
+      taskSpec:
+        workspaces:
+          - name: shared
+        params:
+          - name: idp_base_image
+            default: "$(params.idp_base_image)"
+          - name: product_name
+            default: "$(params.product_name)"
+          - name: base_domain
+            default: "$(params.base_domain)"
+        steps:
+          - name: create-webhooks
+            image: "$(params.idp_base_image)"
+            workingDir: $(workspaces.shared.path)
+            script: |
+              go run scripts/resource-definitions.go scripts/create-github-webhooks.go
+            env:
+              - name: MICROSERVICES_JSON_FILE_PATH
+                value: scripts/microservices.json
+              - name: HELM_CHART_PATH
+                value: "$(workspaces.shared.path)/kubernetes/app-helm-chart/"
