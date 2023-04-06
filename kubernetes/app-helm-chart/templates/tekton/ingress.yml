@@ -11,7 +11,7 @@ spec:
     - host: {{ .Values.tekton.ingress.domain }}
       http:
         paths:
-        - path: {{ template "tekton.ingress.path" . }}
+        - path: "{{ .Values.tekton.ingress.pathPrefix }}"
           pathType: Exact
           backend:
             service:

@@ -71,6 +71,7 @@ tekton:
   ingress:
     port: 8080
     domain: hooks.dev.klstr.io
+    pathPrefix: internal-developer-platform/prod-idp-api # /Namespace/EnvPrefix-SlugName
     annotations:
       <<: *defaultAnnotations
       alb.ingress.kubernetes.io/healthcheck-path: /live

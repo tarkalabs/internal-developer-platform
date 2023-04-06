@@ -85,7 +85,3 @@ startupProbe: {{- toYaml .startupProbe | nindent 2 -}}
 {{- define "tekton.ingress.name" -}}
 {{- printf "%s-webhook-ingress" (include "common.name" .) -}}
 {{- end -}}
-
-{{- define "tekton.ingress.path" -}}
-{{- printf "/%s/%s" .Values.namespace (include "common.name" .) -}}
-{{- end -}}
