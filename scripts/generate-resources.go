@@ -53,7 +53,7 @@ func prefillRequiredData(svcDef *SvcDefinition) {
   }
   svcDef.GithubWebhookDomain = "hooks." + os.Getenv("BASE_DOMAIN")
   svcDef.GithubWebhookPathPrefix = "/" + svcDef.Namespace + "/" + svcDef.EnvPrefix + "-" + svcDef.SlugName
-  svcDef.GithubWebhookUrl = svcDef.GithubWebhookDomain + svcDef.GithubWebhookPathPrefix
+  svcDef.GithubWebhookUrl = "https://" + svcDef.GithubWebhookDomain + svcDef.GithubWebhookPathPrefix
 }
 
 // Not being used right now
