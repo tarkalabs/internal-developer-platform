@@ -53,7 +53,7 @@ func main() {
       "--set",
       fmt.Sprintf("envPrefix=%s", svcDef.EnvPrefix),
       "--set",
-      fmt.Sprintf("webhooks.github.token=%s", svcDef.GithubSecretToken),
+      fmt.Sprintf("webhooks.github.token=%s", svcDef.GithubWebhookSecretToken),
       "--set",
       fmt.Sprintf("tekton.ingress.domain=%s", svcDef.GithubWebhookDomain),
       "--set",

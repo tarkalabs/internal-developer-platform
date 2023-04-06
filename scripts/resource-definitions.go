@@ -28,7 +28,8 @@ type SvcDefinition struct {
   Namespace string `json:"namespace"`
   Domain string `json:"domain"`
   HttpPath string `json:"http_path"`
+  GithubWebhookUrl string `json:"github_webhook_url"`
   GithubWebhookDomain string `json:"github_webhook_domain"`
   GithubWebhookPathPrefix string `json:"github_webhook_path_prefix"`
-  GithubSecretToken string `json:"github_secret_token"`
+  GithubWebhookSecretToken string `json:"github_webhook_secret_token"`
 }
