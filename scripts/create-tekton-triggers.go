@@ -19,7 +19,9 @@ func runSystemCommand(name string, args ...string) {
   cmd.Stdout = &stdout
   cmd.Stderr = &stderr
   err := cmd.Run()
-  fmt.Printf("\nstdout:\n" + stdout.String() + "\nstderr:\n" + stderr.String() + "\n")
+  if os.Getenv("DEBUG_MODE") == "true" {
+    fmt.Printf("\nstdout:\n" + stdout.String() + "\nstderr:\n" + stderr.String() + "\n")
+  }
   checkError(err)
 }
 
@@ -53,7 +55,9 @@ func main() {
       "--set",
       fmt.Sprintf("webhooks.github.token=%s", svcDef.GithubSecretToken),
       "--set",
-      fmt.Sprintf("tekton.domain=hooks.%s", svcDef.Domain),
+      fmt.Sprintf("tekton.ingress.domain=%s", svcDef.GithubWebhookDomain),
+      "--set",
+      fmt.Sprintf("tekton.ingress.pathPrefix=%s", svcDef.GithubWebhookPathPrefix),
       "--set",
       fmt.Sprintf("tekton.triggerTemplate=tekton-%s-pipeline", svcDef.Language),
       "--set",

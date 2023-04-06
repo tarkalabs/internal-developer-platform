@@ -22,10 +22,13 @@ type SvcDefinition struct {
   GitRepo string `json:"git_repo"`
   GitBranch string `json:"git_branch"`
   GithubDeployKey string `json:"github_deploy_key"`
+  GithubWebhookPAT string `json:"github_webhook_pat"`
   DBConnString string `json:"db_conn_string"`
   // below attributes will get overridden while generating sources
   Namespace string `json:"namespace"`
   Domain string `json:"domain"`
   HttpPath string `json:"http_path"`
+  GithubWebhookDomain string `json:"github_webhook_domain"`
+  GithubWebhookPathPrefix string `json:"github_webhook_path_prefix"`
   GithubSecretToken string `json:"github_secret_token"`
 }
