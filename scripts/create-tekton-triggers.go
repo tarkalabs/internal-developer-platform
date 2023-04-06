@@ -34,7 +34,8 @@ func main() {
   for _, svcDef := range svcDefs {
     fmt.Println("Creating tekton trigger for app:", svcDef.Name)
     helm_args := []string {
-      "install",
+      "upgrade",
+      "--install",
       "--wait",
       // "--dry-run",
       "--namespace",
