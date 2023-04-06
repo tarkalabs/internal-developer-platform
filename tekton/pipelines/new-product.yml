@@ -81,6 +81,8 @@ spec:
         params:
           - name: idp_base_image
             default: "$(params.idp_base_image)"
+          - name: idp_platform_debug_mode
+            default: "$(params.idp_platform_debug_mode)"
           - name: aws_region
             default: "$(params.aws_region)"
           - name: eks_cluster_name
@@ -104,8 +106,10 @@ spec:
             image: "$(params.idp_base_image)"
             workingDir: $(workspaces.shared.path)/scripts
             script: |
-              go run resource-definitions.go new-product-validate.go
+              go run resource-definitions.go validate-product.go
             env:
+              - name: DEBUG_MODE
+                value: "$(params.idp_platform_debug_mode)"
               - name: PREDEFINED_TEMPLATE
                 value: "$(params.predefined_template)"
               - name: MICROSERVICES_JSON_FILE_PATH

@@ -20,9 +20,13 @@ func containsStringArray(arr []string, target string) bool {
 
 func validateMicroservicesDefinitions(svcDefs []SvcDefinition) bool {
   fmt.Println("App definitions found total:", len(svcDefs))
-  for _, svcDef := range svcDefs {
-    svcJson,_ := json.Marshal(svcDef)
-    fmt.Println("Validating app definition:", string(svcJson))
+  for idx, svcDef := range svcDefs {
+    if os.Getenv("DEBUG_MODE") == "true" {
+      svcJson,_ := json.Marshal(svcDef)
+      fmt.Println("Validating app definition:", string(svcJson))
+    } else {
+      fmt.Println("Validating app definition at position", idx + 1)
+    }
     if strings.TrimSpace(svcDef.Name) == "" {
       panic("One of the app definitions doesn't have `name` defined!")
     } else if strings.TrimSpace(svcDef.ProductName) == "" {
