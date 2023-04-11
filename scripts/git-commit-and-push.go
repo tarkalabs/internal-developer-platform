@@ -49,13 +49,14 @@ func generateGitDeployKeyFile(svcDef SvcDefinition) (string) {
 }
 
 func commitAndPush(svcDef SvcDefinition) {
+  fmt.Println("Git initial push work started application: " + svcDef.Name)
   // Deploy keys won't work with https urls
   svcDef.GitRepo = strings.Replace(svcDef.GitRepo, "https://github.com/", "git@github.com:", -1)
   shellFilePath := createAppShellScript(svcDef)
   gitDeployKeyFilePath := generateGitDeployKeyFile(svcDef)
   defer os.Remove(shellFilePath)
   defer os.Remove(gitDeployKeyFilePath)
-  runSystemCommand("bash", shellFilePath, gitDeployKeyFilePath, "DEBUG_MODE=true")
+  runSystemCommand("bash", shellFilePath, gitDeployKeyFilePath)
   fmt.Println("Git initial push completed for application: " + svcDef.Name)
 }
 

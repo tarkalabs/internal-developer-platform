@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-# set -xe
+set -xe
 cd {{ .GeneratedFilesPath }}
 ssh -T -ai $1 git@github.com
 git init
