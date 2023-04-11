@@ -54,17 +54,18 @@ func prefillRequiredData(svcDef *SvcDefinition) {
   svcDef.GithubWebhookDomain = "hooks." + os.Getenv("BASE_DOMAIN")
   svcDef.GithubWebhookPathPrefix = "/" + svcDef.Namespace + "/" + svcDef.EnvPrefix + "-" + svcDef.SlugName
   svcDef.GithubWebhookUrl = "https://" + svcDef.GithubWebhookDomain + svcDef.GithubWebhookPathPrefix
+  svcDef.GeneratedFilesPath = filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name)
 }
 
 // Not being used right now
 func generateKubernetesManifests(svcDef SvcDefinition) {
-  createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, "kubernetes"))
+  createFolders(filepath.Join(svcDef.GeneratedFilesPath, "kubernetes"))
   tmplFiles, err := filepath.Glob(filepath.Join(os.Getenv("K8S_MANIFESTS_PATH"), svcDef.Language, "*.yml.tmpl"))
   checkError(err)
   for _, tmplFile := range tmplFiles {
     tmpl, err := template.ParseFiles(tmplFile)
     checkError(err)
-    out, err := os.Create(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, "kubernetes", filepath.Base(tmplFile[:len(tmplFile)-5])))
+    out, err := os.Create(filepath.Join(svcDef.GeneratedFilesPath, "kubernetes", filepath.Base(tmplFile[:len(tmplFile)-5])))
     checkError(err)
     err = tmpl.Execute(out, svcDef)
     checkError(err)
@@ -93,7 +94,7 @@ func runSystemCommand(name string, arg ...string) {
 }
 
 func copyRequiredFiles(svcDef SvcDefinition) {
-  createFolders(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name))
+  createFolders(svcDef.GeneratedFilesPath)
   filePaths, _ := filepath.Glob(filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language) + string(filepath.Separator) + "*")
   for _, filePath := range filePaths {
     fi, err := os.Lstat(filePath)
@@ -102,15 +103,14 @@ func copyRequiredFiles(svcDef SvcDefinition) {
       fmt.Println("Copying file", filePath)
       data, err := os.ReadFile(filePath)
       checkError(err)
-      err = os.WriteFile(filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name, filepath.Base(filePath)), data, 0644)
+      err = os.WriteFile(filepath.Join(svcDef.GeneratedFilesPath, filepath.Base(filePath)), data, 0644)
       checkError(err)
     }
   }
 
   fmt.Println("Copying", svcDef.Language, svcDef.MajorVersion, "version specific files...")
   appTemplatePath := filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language, svcDef.MajorVersion)
-  outputPath := filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name)
-  runSystemCommand("cp", "-rf", appTemplatePath + string(filepath.Separator), outputPath + string(filepath.Separator))
+  runSystemCommand("cp", "-rf", appTemplatePath + string(filepath.Separator), svcDef.GeneratedFilesPath + string(filepath.Separator))
 }
 
 func main() {

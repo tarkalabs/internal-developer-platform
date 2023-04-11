@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# set -xe
+cd {{ .GeneratedFilesPath }}
+ssh -T -ai $1 git@github.com
+git init
+git remote add origin {{ .GitRepo }}
+git checkout -b {{ .GitBranch }}
+git add .
+git commit -m "Initial commit"
+
+git push origin {{ .GitBranch }}
