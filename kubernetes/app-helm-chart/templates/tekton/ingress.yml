@@ -15,7 +15,7 @@ spec:
           pathType: Exact
           backend:
             service:
-              name: {{ template "tekton.event-listener.name" . }}
+              name: {{ template "tekton.event-listener-svc.name" . }}
               port:
                 number: {{ .Values.tekton.ingress.port }}
 {{- end -}}

@@ -74,6 +74,10 @@ startupProbe: {{- toYaml .startupProbe | nindent 2 -}}
 {{- printf "%s-el" (include "common.name" .) -}}
 {{- end -}}
 
+{{- define "tekton.event-listener-svc.name" -}}
+{{- printf "el-%s" (include "tekton.event-listener.name" .) -}}
+{{- end -}}
+
 {{- define "tekton.github-token-secret.name" -}}
 {{- printf "%s-github-token-secret" (include "common.name" .) -}}
 {{- end -}}
