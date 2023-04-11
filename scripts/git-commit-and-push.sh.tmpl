@@ -1,5 +1,6 @@
 set -xe
 cd {{ .GeneratedFilesPath }}
+ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 ssh -T -ai $1 git@github.com
 git init
 git remote add origin {{ .GitRepo }}
