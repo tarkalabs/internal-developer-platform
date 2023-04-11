@@ -1,7 +1,8 @@
 set -xe
 cd {{ .GeneratedFilesPath }}
+mkdir ~/.ssh
 ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-ssh -T -ai $1 git@github.com
+ssh -T -ai $1 git@github.com 2>&1
 git init
 git remote add origin {{ .GitRepo }}
 git checkout -b {{ .GitBranch }}
