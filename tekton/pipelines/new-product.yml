@@ -198,7 +198,7 @@ spec:
               - name: HELM_CHART_PATH
                 value: "$(workspaces.shared.path)/kubernetes/app-helm-chart/"
 
-    - name: create-webhook-and-git-push-resources
+    - name: setup-git-repos
       runAfter:
         - create-tekton-resources
       workspaces:
@@ -207,6 +207,8 @@ spec:
         workspaces:
           - name: shared
         params:
+          - name: idp_platform_debug_mode
+            default: "$(params.idp_platform_debug_mode)"
           - name: idp_base_image
             default: "$(params.idp_base_image)"
           - name: product_name
@@ -214,13 +216,27 @@ spec:
           - name: base_domain
             default: "$(params.base_domain)"
         steps:
-          - name: create-webhooks
+          - name: configure-webhooks
             image: "$(params.idp_base_image)"
             workingDir: $(workspaces.shared.path)
             script: |
-              go run scripts/resource-definitions.go scripts/create-github-webhooks.go
+              go run scripts/resource-definitions.go scripts/configure-github-webhooks.go
             env:
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
               - name: HELM_CHART_PATH
                 value: "$(workspaces.shared.path)/kubernetes/app-helm-chart/"
+          - name: commit-and-push
+            image: "$(params.idp_base_image)"
+            workingDir: $(workspaces.shared.path)
+            script: |
+              go run scripts/resource-definitions.go scripts/git-commit-and-push.go
+            env:
+              - name: DEBUG_MODE
+                value: "$(params.idp_platform_debug_mode)"
+              - name: MICROSERVICES_JSON_FILE_PATH
+                value: scripts/microservices.json
+              - name: OUTPUT_PATH
+                value: "$(workspaces.shared.path)/output"
+              - name: GIT_SHELL_SCRIPT_TEMPLATE_PATH
+                value: "$(workspaces.shared.path)/scripts/git-commit-and-push.sh.tmpl"
