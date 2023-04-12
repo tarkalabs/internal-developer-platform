@@ -50,6 +50,12 @@ spec:
     - name: idp_platform_debug_mode
       description: Enable platform debug mode for testing
       default: "false"
+    - name: idp_platform_admin_email
+      description: Name of the platform admin which will be used for git commits and other operations
+      default: devops@tarkalabs.com
+    - name: idp_platform_admin_name
+      description: Name of the platform admin which will be used for git commits and other operations
+      default: DevOps
 
   workspaces:
     - name: shared
@@ -128,8 +134,10 @@ spec:
         params:
           - name: idp_base_image
             default: "$(params.idp_base_image)"
-          - name: product_name
-            default: "$(params.product_name)"
+          - name: idp_platform_admin_email
+            default: "$(params.idp_platform_admin_email)"
+          - name: idp_platform_admin_name
+            default: "$(params.idp_platform_admin_name)"
           - name: base_domain
             default: "$(params.base_domain)"
           - name: predefined_template
@@ -144,8 +152,10 @@ spec:
               rm -rf $OUTPUT_PATH/*
               go run scripts/resource-definitions.go scripts/generate-resources.go
             env:
-              - name: ProductName
-                value: "$(params.product_name)"
+              - name: ADMIN_EMAIL
+                value: "$(params.idp_platform_admin_email)"
+              - name: ADMIN_NAME
+                value: "$(params.idp_platform_admin_name)"
               - name: BASE_DOMAIN
                 value: "$(params.base_domain)"
               - name: PREDEFINED_TEMPLATE
@@ -178,8 +188,6 @@ spec:
             default: "$(params.idp_platform_tekton_namespace)"
           - name: idp_platform_debug_mode
             default: "$(params.idp_platform_debug_mode)"
-          - name: product_name
-            default: "$(params.product_name)"
           - name: base_domain
             default: "$(params.base_domain)"
         steps:
@@ -211,8 +219,6 @@ spec:
             default: "$(params.idp_platform_debug_mode)"
           - name: idp_base_image
             default: "$(params.idp_base_image)"
-          - name: product_name
-            default: "$(params.product_name)"
           - name: base_domain
             default: "$(params.base_domain)"
         steps:

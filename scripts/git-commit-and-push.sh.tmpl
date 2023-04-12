@@ -11,6 +11,8 @@ chmod 400 $1
 ssh-add $1
 
 echo Pushing all generated files to git
+git config --global user.name "{{ .AdminName }}"
+git config --global user.email "{{ .AdminEmail }}"
 git init
 git remote add origin {{ .GitRepo }}
 

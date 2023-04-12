@@ -14,6 +14,8 @@ type SvcDefinition struct {
   Language string `json:"language"`
   MajorVersion string `json:"major_version"`
   ProductName string `json:"product_name"`
+  AdminName string `json:"admin_name"`
+  AdminEmail string `json:"admin_email"`
   Name string `json:"name"`
   SlugName string `json:"slug_name"`
   Environment string `json:"environment"`

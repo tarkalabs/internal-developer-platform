@@ -54,6 +54,9 @@ func prefillRequiredData(svcDef *SvcDefinition) {
   svcDef.GithubWebhookDomain = "hooks." + os.Getenv("BASE_DOMAIN")
   svcDef.GithubWebhookPathPrefix = "/" + svcDef.Namespace + "/" + svcDef.EnvPrefix + "-" + svcDef.SlugName
   svcDef.GithubWebhookUrl = "https://" + svcDef.GithubWebhookDomain + svcDef.GithubWebhookPathPrefix
+
+  svcDef.AdminName = os.Getenv("ADMIN_NAME")
+  svcDef.AdminEmail = os.Getenv("ADMIN_EMAIL")
   svcDef.GeneratedFilesPath = filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name)
 }
 
