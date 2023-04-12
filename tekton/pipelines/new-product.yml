@@ -163,7 +163,7 @@ spec:
               - name: OUTPUT_PATH
                 value: "$(workspaces.shared.path)/output"
 
-    - name: create-tekton-resources
+    - name: update-tekton-resources
       runAfter:
         - generate-resources
       workspaces:
@@ -187,7 +187,7 @@ spec:
             image: "$(params.idp_base_image)"
             workingDir: $(workspaces.shared.path)
             script: |
-              go run scripts/resource-definitions.go scripts/create-tekton-triggers.go
+              go run scripts/resource-definitions.go scripts/configure-tekton-triggers.go
             env:
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
@@ -200,7 +200,7 @@ spec:
 
     - name: setup-git-repos
       runAfter:
-        - create-tekton-resources
+        - update-tekton-resources
       workspaces:
         - name: shared
       taskSpec:

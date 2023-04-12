@@ -1,12 +1,29 @@
 set -xe
+
+echo Changing directory
 cd {{ .GeneratedFilesPath }}
+
+echo Running ssh related commands
 mkdir ~/.ssh
 ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-ssh -T -ai $1 git@github.com 2>&1
+eval `ssh-agent -s`
+chmod 400 $1
+ssh-add $1
+
+echo Pushing all generated files to git
 git init
 git remote add origin {{ .GitRepo }}
-git checkout -b {{ .GitBranch }}
-git add .
-git commit -m "Initial commit"
 
-git push origin {{ .GitBranch }}
+echo Checking provided git branch already exists
+exists=$(git ls-remote --heads {{ .GitRepo }} {{ .GitBranch }})
+if [[ $exists == "" ]]; then
+  git checkout -b {{ .GitBranch }}
+  git add .
+  git commit -m "Initial commit"
+
+  echo Pushing files to git
+  git push origin {{ .GitBranch }}
+else
+  echo "Branch ({{ .GitBranch }}) already exists! Exiting!"
+  exit 1
+fi
