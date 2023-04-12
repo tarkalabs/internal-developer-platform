@@ -15,12 +15,11 @@ spec:
             eventTypes:
               - push
         - cel:
-            filter: "header.match('X-GitHub-Event', 'pull_request')"
             overlays:
               - key: extensions.branch
                 expression: "body.ref.split('/')[2]"
               - key: extensions.head_short_sha
-                expression: "body.pull_request.head.id.truncate(7)"
+                expression: "body.head_commit.id.truncate(7)"
       bindings:
         - ref: github-binding
       template:
