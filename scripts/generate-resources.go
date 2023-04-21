@@ -4,10 +4,11 @@ import (
   "os"
   "strings"
   "os/exec"
+  "math/rand"
   "path/filepath"
   "encoding/json"
   "text/template"
-  "math/rand"
+  "regexp"
 	"time"
 )
 
@@ -58,6 +59,9 @@ func prefillRequiredData(svcDef *SvcDefinition) {
   svcDef.AdminName = os.Getenv("ADMIN_NAME")
   svcDef.AdminEmail = os.Getenv("ADMIN_EMAIL")
   svcDef.GeneratedFilesPath = filepath.Join(os.Getenv("OUTPUT_PATH"), svcDef.Name)
+
+  githubRepoRe := regexp.MustCompile(`.*github\.com\/(.*)\.git$`)
+  svcDef.OwnerAndRepo = githubRepoRe.FindStringSubmatch(svcDef.GitRepo)[1]
 }
 
 // Not being used right now

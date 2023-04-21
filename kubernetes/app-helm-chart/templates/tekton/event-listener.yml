@@ -18,6 +18,8 @@ spec:
             overlays:
               - key: branch
                 expression: "body.ref.split('/')[2]"
+              - key: owner_and_repo
+                expression: "body.repository.full_name.replace('_','-').replace('/','_').lowerAscii()"
               - key: head_short_sha
                 expression: "body.head_commit.id.truncate(7)"
       bindings:

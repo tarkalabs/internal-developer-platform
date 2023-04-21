@@ -8,8 +8,8 @@ spec:
   params:
     - name: branch
       value: $(extensions.branch)
-    - name: gitShortSha
+    - name: git_short_sha
       value: $(extensions.head_short_sha)
-    - name: repoFullName # owner/repo_name
+    - name: repo_full_name # owner/repo_name
       value: $(body.repository.full_name)
 {{- end -}}

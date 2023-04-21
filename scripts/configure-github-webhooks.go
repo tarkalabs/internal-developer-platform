@@ -48,10 +48,8 @@ func getHookIdIfWebhookAlreadyExists(repoHooksUrl string, targetUrl string, acce
 
 func configureGithubWebhook(svcDef SvcDefinition) {
   fmt.Println("Configuring github webhook for app:", svcDef.Name)
-  githubRepoRe := regexp.MustCompile(`.*github\.com\/(.*)\.git$`)
-  githubOwnerAndRepo := githubRepoRe.FindStringSubmatch(svcDef.GitRepo)
   data := "{\"name\":\"web\",\"active\":true,\"events\":[\"push\",\"pull_request\"],\"config\":{\"url\":\"" + svcDef.GithubWebhookUrl + "\",\"content_type\":\"json\",\"secret\":\"" + svcDef.GithubWebhookSecretToken + "\"}}"
-  repoHooksUrl := "https://api.github.com/repos/" + githubOwnerAndRepo[1] + "/hooks"
+  repoHooksUrl := "https://api.github.com/repos/" + svcDef.OwnerAndRepo + "/hooks"
   hookId := getHookIdIfWebhookAlreadyExists(repoHooksUrl, svcDef.GithubWebhookUrl, svcDef.GithubWebhookPAT)
   if hookId == "" {
     respStatusCode, body := makeGithubApiRequest("POST", repoHooksUrl, data, svcDef.GithubWebhookPAT)
