@@ -58,8 +58,6 @@ func main() {
       "--set",
       fmt.Sprintf("secretData.sshDeployKey=%s", svcDef.GithubDeployKey),
       "--set",
-      fmt.Sprintf("secretData.awsRegion=%s", os.Getenv("AWS_REGION")),
-      "--set",
       fmt.Sprintf("secretData.ecrRepoUrl=%s", os.Getenv("BASE_ECR_URL") + "/" + svcDef.ProductName),
       "--set",
       fmt.Sprintf("tekton.pipelineBaseImage=%s", os.Getenv("PIPELINE_BASE_IMAGE")),
