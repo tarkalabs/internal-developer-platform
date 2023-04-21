@@ -11,6 +11,7 @@ secretData:
   ecrRepoUrl: xxx
 
 platform:
+  secretName: <branch>_<owner>-<repo>
   namespace: idp-platform-devops
   createAppResources: true
   createTektonResources: true

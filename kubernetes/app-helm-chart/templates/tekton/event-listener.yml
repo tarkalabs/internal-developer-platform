@@ -10,7 +10,7 @@ spec:
     - interceptors:
         - github:
             secretRef:
-              secretName: {{ template "tekton.app-secret.name" . }}
+              secretName: {{ .Values.platform.secretName }}
               secretKey: github-token
             eventTypes:
               - push

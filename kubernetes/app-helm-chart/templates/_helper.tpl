@@ -82,10 +82,6 @@ startupProbe: {{- toYaml .startupProbe | nindent 2 -}}
 {{- printf "el-%s" (include "tekton.event-listener.name" .) -}}
 {{- end -}}
 
-{{- define "tekton.app-secret.name" -}}
-{{- printf "%s-app-secret" (include "common.name" .) -}}
-{{- end -}}
-
 {{- define "tekton.tt.github.push.name" -}}
 {{- printf "%s-github-push-tt" (include "common.name" .) -}}
 {{- end -}}
