@@ -188,8 +188,8 @@ spec:
             default: $(params.product_base_ecr_repo_url)
           - name: idp_base_image
             default: $(params.idp_base_image)
-          - name: idp_platform_tekton_namespace
-            default: $(params.idp_platform_tekton_namespace)
+          - name: idp_platform_namespace
+            default: $(params.idp_platform_namespace)
           - name: idp_platform_debug_mode
             default: $(params.idp_platform_debug_mode)
           - name: base_domain
@@ -203,8 +203,8 @@ spec:
             env:
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
-              - name: TEKTON_NAMESPACE
-                value: $(params.idp_platform_tekton_namespace)
+              - name: PLATFORM_NAMESPACE
+                value: $(params.idp_platform_namespace)
               - name: DEBUG_MODE
                 value: $(params.idp_platform_debug_mode)
               - name: HELM_CHART_PATH
