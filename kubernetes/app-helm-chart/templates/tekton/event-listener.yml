@@ -5,7 +5,7 @@ metadata:
   name: {{ template "tekton.event-listener.name" . }}
   namespace: {{ .Values.tekton.namespace }}
 spec:
-  serviceAccountName: tekton-event-listener-sa
+  serviceAccountName: {{ template "tekton.sa.name" . }}
   triggers:
     - interceptors:
         - github:

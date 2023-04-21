@@ -1,7 +1,5 @@
-{{- if .Values.create.appResources -}}
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ .Values.namespace }}
   labels: {{ include "common.labels" . | nindent 4 }}
-{{- end -}}

@@ -67,7 +67,7 @@ ingress:
     alb.ingress.kubernetes.io/healthcheck-path: /
 
 tekton:
-  namespace: tekton-pipelines
+  namespace: idp-platform-devops
   pipelineBaseImage: ubuntu:latest
   ingress:
     port: 8080

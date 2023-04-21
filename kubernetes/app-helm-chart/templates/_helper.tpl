@@ -74,6 +74,10 @@ startupProbe: {{- toYaml .startupProbe | nindent 2 -}}
 {{- printf "%s-el" (include "common.name" .) -}}
 {{- end -}}
 
+{{- define "tekton.sa.name" -}}
+{{- printf "%s-tekton-sa" (include "common.name" .) -}}
+{{- end -}}
+
 {{- define "tekton.event-listener-svc.name" -}}
 {{- printf "el-%s" (include "tekton.event-listener.name" .) -}}
 {{- end -}}

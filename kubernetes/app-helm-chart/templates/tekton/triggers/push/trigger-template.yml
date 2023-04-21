@@ -22,6 +22,7 @@ spec:
         generateName: {{ template "tekton.pipelinerun.name-prefix" . }}
         namespace: {{ .Values.tekton.namespace }}
       spec:
+        serviceAccountName: {{ template "tekton.sa.name" . }}
         pipelineRef:
           name: {{ template "tekton.push.pipeline.name" . }}
         workspaces:

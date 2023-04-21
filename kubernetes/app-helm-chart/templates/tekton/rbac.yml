@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: tekton-event-listener-sa
+  name: {{ template "tekton.sa.name" . }}
   namespace: {{ .Values.tekton.namespace }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: tekton-triggers-cr
+  name: {{ template "common.name" . }}-tekton-cr
 rules:
   - apiGroups: ["triggers.tekton.dev"]
     resources: ["clustertriggerbindings", "clusterinterceptors"]
@@ -17,20 +17,20 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: tekton-triggers-crb
+  name: {{ template "common.name" . }}-tekton-crb
 subjects:
   - kind: ServiceAccount
-    name: tekton-event-listener-sa
+    name: {{ template "tekton.sa.name" . }}
     namespace: {{ .Values.tekton.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: tekton-triggers-cr
+  name: {{ template "common.name" . }}-tekton-cr
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: tekton-triggers-ro
+  name: {{ template "common.name" . }}-tekton-platform-ro
   namespace: {{ .Values.tekton.namespace }}
 rules:
   - apiGroups: [""]
@@ -50,14 +50,38 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: tekton-triggers-rb
+  name: {{ template "common.name" . }}-tekton-platform-rb
   namespace: {{ .Values.tekton.namespace }}
 subjects:
   - kind: ServiceAccount
-    name: tekton-event-listener-sa
+    name: {{ template "tekton.sa.name" . }}
     namespace: {{ .Values.tekton.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: tekton-triggers-ro
+  name: {{ template "common.name" . }}-tekton-platform-ro
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "common.name" . }}-tekton-app-ro
+  namespace: {{ .Values.namespace }}
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "common.name" . }}-tekton-app-rb
+  namespace: {{ .Values.namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "tekton.sa.name" . }}
+    namespace: {{ .Values.tekton.namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "common.name" . }}-tekton-app-ro
 {{- end -}}
