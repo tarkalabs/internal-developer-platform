@@ -23,6 +23,8 @@ spec:
       default: "[]"
     - name: github_webhook_access_token
       description: Github PAT which has access to create webhooks for repositories
+    - name: product_base_ecr_repo_url
+      description: Base ECR repository url for the product
 
     # kubernetes specific params
     - name: aws_region
@@ -70,9 +72,9 @@ spec:
         name: git-clone
       params:
         - name: url
-          value: "$(params.idp_git_repo_url)"
+          value: $(params.idp_git_repo_url)
         - name: revision
-          value: "$(params.idp_git_repo_revision)"
+          value: $(params.idp_git_repo_revision)
         - name: depth
           value: 1
 
@@ -86,42 +88,42 @@ spec:
           - name: shared
         params:
           - name: idp_base_image
-            default: "$(params.idp_base_image)"
+            default: $(params.idp_base_image)
           - name: idp_platform_debug_mode
-            default: "$(params.idp_platform_debug_mode)"
+            default: $(params.idp_platform_debug_mode)
           - name: aws_region
-            default: "$(params.aws_region)"
+            default: $(params.aws_region)
           - name: eks_cluster_name
-            default: "$(params.eks_cluster_name)"
+            default: $(params.eks_cluster_name)
           - name: predefined_template
-            default: "$(params.predefined_template)"
+            default: $(params.predefined_template)
           - name: microservices_json
-            default: "$(params.microservices_json)"
+            default: $(params.microservices_json)
           - name: github_webhook_access_token
-            default: "$(params.github_webhook_access_token)"
+            default: $(params.github_webhook_access_token)
         steps:
           - name: init
-            image: "$(params.idp_base_image)"
+            image: $(params.idp_base_image)
             workingDir: $(workspaces.shared.path)/scripts
             script: |
               printf '%s' "$MICROSERVICES_JSON" > microservices.json
             env:
               - name: MICROSERVICES_JSON
-                value: "$(params.microservices_json)"
+                value: $(params.microservices_json)
           - name: validate
-            image: "$(params.idp_base_image)"
+            image: $(params.idp_base_image)
             workingDir: $(workspaces.shared.path)/scripts
             script: |
               go run resource-definitions.go validate-product.go
             env:
               - name: DEBUG_MODE
-                value: "$(params.idp_platform_debug_mode)"
+                value: $(params.idp_platform_debug_mode)
               - name: PREDEFINED_TEMPLATE
-                value: "$(params.predefined_template)"
+                value: $(params.predefined_template)
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: microservices.json
               - name: GITHUB_WEBHOOK_ACCESS_TOKEN
-                value: "$(params.github_webhook_access_token)"
+                value: $(params.github_webhook_access_token)
 
     - name: generate-resources
       runAfter:
@@ -133,37 +135,37 @@ spec:
           - name: shared
         params:
           - name: idp_base_image
-            default: "$(params.idp_base_image)"
+            default: $(params.idp_base_image)
           - name: idp_platform_admin_email
-            default: "$(params.idp_platform_admin_email)"
+            default: $(params.idp_platform_admin_email)
           - name: idp_platform_admin_name
-            default: "$(params.idp_platform_admin_name)"
+            default: $(params.idp_platform_admin_name)
           - name: base_domain
-            default: "$(params.base_domain)"
+            default: $(params.base_domain)
           - name: predefined_template
-            default: "$(params.predefined_template)"
+            default: $(params.predefined_template)
           - name: github_webhook_access_token
-            default: "$(params.github_webhook_access_token)"
+            default: $(params.github_webhook_access_token)
         steps:
           - name: generate-files
-            image: "$(params.idp_base_image)"
+            image: $(params.idp_base_image)
             workingDir: $(workspaces.shared.path)
             script: |
               rm -rf $OUTPUT_PATH/*
               go run scripts/resource-definitions.go scripts/generate-resources.go
             env:
               - name: ADMIN_EMAIL
-                value: "$(params.idp_platform_admin_email)"
+                value: $(params.idp_platform_admin_email)
               - name: ADMIN_NAME
-                value: "$(params.idp_platform_admin_name)"
+                value: $(params.idp_platform_admin_name)
               - name: BASE_DOMAIN
-                value: "$(params.base_domain)"
+                value: $(params.base_domain)
               - name: PREDEFINED_TEMPLATE
-                value: "$(params.predefined_template)"
+                value: $(params.predefined_template)
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
               - name: GITHUB_WEBHOOK_ACCESS_TOKEN
-                value: "$(params.github_webhook_access_token)"
+                value: $(params.github_webhook_access_token)
               - name: APP_TEMPLATES_PATH
                 value: "$(workspaces.shared.path)/app-templates"
               - name: K8S_MANIFESTS_PATH
@@ -182,17 +184,19 @@ spec:
         workspaces:
           - name: shared
         params:
+          - name: product_base_ecr_repo_url
+            default: $(params.product_base_ecr_repo_url)
           - name: idp_base_image
-            default: "$(params.idp_base_image)"
+            default: $(params.idp_base_image)
           - name: idp_platform_tekton_namespace
-            default: "$(params.idp_platform_tekton_namespace)"
+            default: $(params.idp_platform_tekton_namespace)
           - name: idp_platform_debug_mode
-            default: "$(params.idp_platform_debug_mode)"
+            default: $(params.idp_platform_debug_mode)
           - name: base_domain
-            default: "$(params.base_domain)"
+            default: $(params.base_domain)
         steps:
           - name: helm-install
-            image: "$(params.idp_base_image)"
+            image: $(params.idp_base_image)
             workingDir: $(workspaces.shared.path)
             script: |
               go run scripts/resource-definitions.go scripts/configure-tekton-triggers.go
@@ -200,11 +204,15 @@ spec:
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
               - name: TEKTON_NAMESPACE
-                value: "$(params.idp_platform_tekton_namespace)"
+                value: $(params.idp_platform_tekton_namespace)
               - name: DEBUG_MODE
-                value: "$(params.idp_platform_debug_mode)"
+                value: $(params.idp_platform_debug_mode)
               - name: HELM_CHART_PATH
                 value: "$(workspaces.shared.path)/kubernetes/app-helm-chart/"
+              - name: BASE_ECR_URL
+                value: $(params.product_base_ecr_repo_url)
+              - name: PIPELINE_BASE_IMAGE
+                value: $(params.idp_base_image)
 
     - name: setup-git-repos
       runAfter:
@@ -216,14 +224,14 @@ spec:
           - name: shared
         params:
           - name: idp_platform_debug_mode
-            default: "$(params.idp_platform_debug_mode)"
+            default: $(params.idp_platform_debug_mode)
           - name: idp_base_image
-            default: "$(params.idp_base_image)"
+            default: $(params.idp_base_image)
           - name: base_domain
-            default: "$(params.base_domain)"
+            default: $(params.base_domain)
         steps:
           - name: configure-webhooks
-            image: "$(params.idp_base_image)"
+            image: $(params.idp_base_image)
             workingDir: $(workspaces.shared.path)
             script: |
               go run scripts/resource-definitions.go scripts/configure-github-webhooks.go
@@ -233,13 +241,13 @@ spec:
               - name: HELM_CHART_PATH
                 value: "$(workspaces.shared.path)/kubernetes/app-helm-chart/"
           - name: commit-and-push
-            image: "$(params.idp_base_image)"
+            image: $(params.idp_base_image)
             workingDir: $(workspaces.shared.path)
             script: |
               go run scripts/resource-definitions.go scripts/git-commit-and-push.go
             env:
               - name: DEBUG_MODE
-                value: "$(params.idp_platform_debug_mode)"
+                value: $(params.idp_platform_debug_mode)
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
               - name: OUTPUT_PATH
