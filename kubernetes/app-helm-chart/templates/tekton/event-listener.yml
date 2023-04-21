@@ -16,9 +16,9 @@ spec:
               - push
         - cel:
             overlays:
-              - key: extensions.branch
+              - key: branch
                 expression: "body.ref.split('/')[2]"
-              - key: extensions.head_short_sha
+              - key: head_short_sha
                 expression: "body.head_commit.id.truncate(7)"
       bindings:
         - ref: github-binding

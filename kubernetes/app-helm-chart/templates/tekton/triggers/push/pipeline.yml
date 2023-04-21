@@ -5,39 +5,38 @@ metadata:
   name: {{ template "tekton.push.pipeline.name" . }}
   namespace: {{ .Values.tekton.namespace }}
 spec:
-  pipelineSpec:
-    params:
-      - name: branch
-        description: Name of the git branch
-      - name: repo_full_name
-        description: Github repository full name
-      - name: git_short_sha
-        description: Github head commit id short sha
+  params:
+    - name: branch
+      description: Name of the git branch
+    - name: repo_full_name
+      description: Github repository full name
+    - name: git_short_sha
+      description: Github head commit id short sha
 
-    workspaces:
-      - name: shared
-        description: Workspace to checkout git repository into
+  workspaces:
+    - name: shared
+      description: Workspace to checkout git repository into
 
-    tasks:
-      - name: init
+  tasks:
+    - name: init
+      workspaces:
+        - name: shared
+      taskSpec:
         workspaces:
           - name: shared
-        taskSpec:
-          workspaces:
-            - name: shared
-          params:
-            - name: branch
-              default: "$(params.branch)"
-            - name: repo_full_name
-              default: "$(params.repo_full_name)"
-          steps:
-            - name: init
-              image: {{ .Values.tekton.pipelineBaseImage }}
-              workingDir: $(workspaces.shared.path)
-              script: |
-                echo secret name is "$SECRET_NAME"
-                pwd
-              env:
-                - name: SECRET_NAME
-                  value: "$(params.branch)_$(params.repo_full_name)"
+        params:
+          - name: branch
+            default: "$(params.branch)"
+          - name: repo_full_name
+            default: "$(params.repo_full_name)"
+        steps:
+          - name: init
+            image: {{ .Values.tekton.pipelineBaseImage }}
+            workingDir: $(workspaces.shared.path)
+            script: |
+              echo secret name is "$SECRET_NAME"
+              pwd
+            env:
+              - name: SECRET_NAME
+                value: "$(params.branch)_$(params.repo_full_name)"
 {{- end -}}

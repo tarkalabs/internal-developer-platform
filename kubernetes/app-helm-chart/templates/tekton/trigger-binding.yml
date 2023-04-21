@@ -7,9 +7,9 @@ metadata:
 spec:
   params:
     - name: branch
-      value: $(body.extensions.branch)
+      value: $(extensions.branch)
     - name: gitShortSha
-      value: $(body.extensions.head_short_sha)
+      value: $(extensions.head_short_sha)
     - name: repoFullName # owner/repo_name
       value: $(body.repository.full_name)
 {{- end -}}
