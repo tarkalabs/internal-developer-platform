@@ -34,7 +34,7 @@ func main() {
 
   for _, svcDef := range svcDefs {
     fmt.Println("Creating tekton trigger for app:", svcDef.Name)
-    ownerAndRepoFormatted := strings.ToLower(strings.Replace(strings.ReplaceAll(svcDef.OwnerAndRepo, "_", "-"), "/", "_"))
+    ownerAndRepoFormatted := strings.ToLower(strings.Replace(strings.ReplaceAll(svcDef.OwnerAndRepo, "_", "-"), "/", "-", 1))
     helm_args := []string {
       "upgrade",
       "--install",
@@ -56,7 +56,7 @@ func main() {
       "--set",
       fmt.Sprintf("namespace=%s", svcDef.Namespace),
       "--set",
-      fmt.Sprintf("platform.secretName=%s", svcDef.GitBranch + "_" + ownerAndRepoFormatted),
+      fmt.Sprintf("platform.secretName=%s", svcDef.GitBranch + "-" + ownerAndRepoFormatted),
       "--set",
       fmt.Sprintf("platform.createAppResources=false"),
       "--set",
