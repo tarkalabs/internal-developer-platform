@@ -1,9 +1,9 @@
-{{- if .Values.create.tektonResources -}}
+{{- if .Values.platform.createTektonResources -}}
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
   name: {{ template "tekton.event-listener.name" . }}
-  namespace: {{ .Values.tekton.namespace }}
+  namespace: {{ .Values.platform.namespace }}
 spec:
   serviceAccountName: {{ template "tekton.sa.name" . }}
   triggers:

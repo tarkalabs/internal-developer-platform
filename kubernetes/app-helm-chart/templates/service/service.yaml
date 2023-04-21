@@ -1,4 +1,4 @@
-{{- if .Values.create.appResources -}}
+{{- if .Values.platform.createAppResources -}}
 apiVersion: v1
 kind: Service
 metadata:

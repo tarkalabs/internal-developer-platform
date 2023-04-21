@@ -1,9 +1,9 @@
-{{- if .Values.create.tektonResources -}}
+{{- if .Values.platform.createTektonResources -}}
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: {{ template "tekton.push.pipeline.name" . }}
-  namespace: {{ .Values.tekton.namespace }}
+  namespace: {{ .Values.platform.namespace }}
 spec:
   params:
     - name: branch

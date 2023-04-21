@@ -1,9 +1,9 @@
-{{- if .Values.create.tektonResources -}}
+{{- if .Values.platform.createTektonResources -}}
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
   name: {{ template "tekton.tt.github.push.name" . }}
-  namespace: {{ .Values.tekton.namespace }}
+  namespace: {{ .Values.platform.namespace }}
   annotations:
     triggers.tekton.dev/old-escape-quotes: "true"
 spec:
@@ -20,7 +20,7 @@ spec:
       kind: PipelineRun
       metadata:
         generateName: {{ template "tekton.pipelinerun.name-prefix" . }}
-        namespace: {{ .Values.tekton.namespace }}
+        namespace: {{ .Values.platform.namespace }}
       spec:
         serviceAccountName: {{ template "tekton.sa.name" . }}
         pipelineRef:

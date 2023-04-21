@@ -10,9 +10,10 @@ secretData:
   sshDeployKey: xxx
   ecrRepoUrl: xxx
 
-create:
-  appResources: true
-  tektonResources: true
+platform:
+  namespace: idp-platform-devops
+  createAppResources: true
+  createTektonResources: true
 
 deployment:
   replicas: 1
@@ -67,7 +68,6 @@ ingress:
     alb.ingress.kubernetes.io/healthcheck-path: /
 
 tekton:
-  namespace: idp-platform-devops
   pipelineBaseImage: ubuntu:latest
   ingress:
     port: 8080

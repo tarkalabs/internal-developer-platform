@@ -1,9 +1,9 @@
-{{- if .Values.create.tektonResources -}}
+{{- if .Values.platform.createTektonResources -}}
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
   name: github-binding
-  namespace: {{ .Values.tekton.namespace }}
+  namespace: {{ .Values.platform.namespace }}
 spec:
   params:
     - name: branch

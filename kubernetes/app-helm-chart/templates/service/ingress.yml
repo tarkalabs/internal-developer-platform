@@ -1,4 +1,4 @@
-{{- if .Values.create.appResources -}}
+{{- if .Values.platform.createAppResources -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:

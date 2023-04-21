@@ -1,9 +1,9 @@
-{{- if .Values.create.tektonResources -}}
+{{- if .Values.platform.createTektonResources -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ template "tekton.sa.name" . }}
-  namespace: {{ .Values.tekton.namespace }}
+  namespace: {{ .Values.platform.namespace }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -21,7 +21,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ template "tekton.sa.name" . }}
-    namespace: {{ .Values.tekton.namespace }}
+    namespace: {{ .Values.platform.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -31,7 +31,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ template "common.name" . }}-tekton-platform-ro
-  namespace: {{ .Values.tekton.namespace }}
+  namespace: {{ .Values.platform.namespace }}
 rules:
   - apiGroups: [""]
     resources: ["configmaps", "secrets"]
@@ -51,11 +51,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ template "common.name" . }}-tekton-platform-rb
-  namespace: {{ .Values.tekton.namespace }}
+  namespace: {{ .Values.platform.namespace }}
 subjects:
   - kind: ServiceAccount
     name: {{ template "tekton.sa.name" . }}
-    namespace: {{ .Values.tekton.namespace }}
+    namespace: {{ .Values.platform.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -79,7 +79,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: {{ template "tekton.sa.name" . }}
-    namespace: {{ .Values.tekton.namespace }}
+    namespace: {{ .Values.platform.namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
