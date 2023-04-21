@@ -1,0 +1,37 @@
+{{- if .Values.create.tektonResources -}}
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: {{ template "tekton.tt.github.push.name" . }}
+  namespace: {{ .Values.tekton.namespace }}
+  annotations:
+    triggers.tekton.dev/old-escape-quotes: "true"
+spec:
+  params:
+    - name: branch
+      description: Name of the git branch
+    - name: repo_full_name
+      description: Github repository full name
+    - name: git_short_sha
+      description: Github head commit id short sha
+
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: {{ template "tekton.pipelinerun.name-prefix" . }}
+        namespace: {{ .Values.tekton.namespace }}
+      spec:
+        pipelineRef:
+          name: {{ template "tekton.push.pipeline.name" . }}
+        workspaces:
+          - name: shared
+            emptyDir: {}
+        params:
+          - name: branch
+            value: $(tt.params.branch)
+          - name: repo_full_name
+            value: $(tt.params.repo_full_name)
+          - name: git_short_sha
+            value: $(tt.params.git_short_sha)
+{{- end -}}

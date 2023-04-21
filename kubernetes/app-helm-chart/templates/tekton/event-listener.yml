@@ -1,4 +1,4 @@
-{{- if .Values.create.tekton_resources -}}
+{{- if .Values.create.tektonResources -}}
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
@@ -10,8 +10,8 @@ spec:
     - interceptors:
         - github:
             secretRef:
-              secretName: {{ template "tekton.github-token-secret.name" . }}
-              secretKey: token
+              secretName: {{ template "tekton.app-secret.name" . }}
+              secretKey: github-token
             eventTypes:
               - push
         - cel:

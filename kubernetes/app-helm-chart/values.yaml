@@ -5,9 +5,14 @@ environment: production
 envPrefix: prod
 namespace: internal-developer-platform
 
+secretData:
+  githubToken: xxx
+  sshDeployKey: xxx
+  ecrRepoUrl: xxx
+
 create:
-  app_resources: true
-  tekton_resources: true
+  appResources: true
+  tektonResources: true
 
 deployment:
   replicas: 1
@@ -61,13 +66,9 @@ ingress:
     <<: *defaultAnnotations
     alb.ingress.kubernetes.io/healthcheck-path: /
 
-webhooks:
-  github:
-    token: xxx
-
 tekton:
-  triggerTemplate: ""
   namespace: tekton-pipelines
+  pipelineBaseImage: ubuntu:latest
   ingress:
     port: 8080
     domain: hooks.dev.klstr.io

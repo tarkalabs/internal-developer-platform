@@ -1,4 +1,4 @@
-{{- if .Values.create.tekton_resources -}}
+{{- if .Values.create.tektonResources -}}
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
@@ -10,8 +10,6 @@ spec:
       value: $(body.extensions.branch)
     - name: gitShortSha
       value: $(body.extensions.head_short_sha)
-    - name: repoFullName
+    - name: repoFullName # owner/repo_name
       value: $(body.repository.full_name)
-    - name: repoHtmlUrl
-      value: $(body.repository.html_url)
 {{- end -}}

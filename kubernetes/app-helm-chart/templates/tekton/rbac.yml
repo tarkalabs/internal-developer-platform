@@ -1,4 +1,4 @@
-{{- if .Values.create.tekton_resources -}}
+{{- if .Values.create.tektonResources -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
