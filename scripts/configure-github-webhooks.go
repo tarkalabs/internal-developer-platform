@@ -3,7 +3,6 @@ import (
   "fmt"
   "os"
   "bytes"
-  "regexp"
   "io/ioutil"
   "net/http"
   "encoding/json"
