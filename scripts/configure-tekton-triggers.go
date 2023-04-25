@@ -60,6 +60,8 @@ func main() {
       "--set",
       fmt.Sprintf("platform.createAppResources=false"),
       "--set",
+      fmt.Sprintf("platform.pipelineStorageClass=%s", os.Getenv("PIPELINE_DEFAULT_STORAGE_CLASS")),
+      "--set",
       fmt.Sprintf("platform.namespace=%s", os.Getenv("PLATFORM_NAMESPACE")),
       "--set",
       fmt.Sprintf("secretData.githubToken=%s", svcDef.GithubWebhookSecretToken),

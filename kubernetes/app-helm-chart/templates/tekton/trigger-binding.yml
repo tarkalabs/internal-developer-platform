@@ -10,6 +10,8 @@ spec:
       value: $(extensions.branch)
     - name: git_short_sha
       value: $(extensions.head_short_sha)
-    - name: repo_full_name # owner/repo_name
-      value: $(body.repository.full_name)
+    - name: owner_and_repo # owner/repo_name
+      value: $(extensions.owner_and_repo)
+    - name: git_https_url
+      value: $(body.repository.clone_url)
 {{- end -}}

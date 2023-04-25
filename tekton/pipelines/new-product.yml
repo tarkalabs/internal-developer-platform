@@ -213,6 +213,8 @@ spec:
                 value: $(params.product_base_ecr_repo_url)
               - name: PIPELINE_BASE_IMAGE
                 value: $(params.idp_base_image)
+              - name: PIPELINE_DEFAULT_STORAGE_CLASS
+                value: gp3-delete
 
     - name: setup-git-repos
       runAfter:

@@ -13,6 +13,7 @@ secretData:
 platform:
   secretName: <branch>_<owner>-<repo>
   namespace: idp-platform-devops
+  pipelineStorageClass: gp3
   createAppResources: true
   createTektonResources: true
 

@@ -8,8 +8,10 @@ spec:
   params:
     - name: branch
       description: Name of the git branch
-    - name: repo_full_name
-      description: Github repository full name
+    - name: git_https_url
+      description: Git https url to clone resources from
+    - name: owner_and_repo
+      description: Github repository owner and repo name formatted
     - name: git_short_sha
       description: Github head commit id short sha
 
@@ -27,16 +29,67 @@ spec:
         params:
           - name: branch
             default: "$(params.branch)"
-          - name: repo_full_name
-            default: "$(params.repo_full_name)"
+          - name: owner_and_repo
+            default: "$(params.owner_and_repo)"
         steps:
           - name: init
             image: {{ .Values.tekton.pipelineBaseImage }}
             workingDir: $(workspaces.shared.path)
             script: |
-              echo secret name is "$SECRET_NAME"
-              pwd
+              echo "$SSH_DEPLOY_KEY" > id_rsa
             env:
-              - name: SECRET_NAME
-                value: "$(params.branch)_$(params.repo_full_name)"
+              - name: SSH_DEPLOY_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: $(params.branch)-$(params.owner_and_repo)
+                    key: ssh-deploy-key
+    - name: clone-repo
+      runAfter:
+        - init
+      workspaces:
+        - name: ssh-directory
+          workspace: shared
+        - name: output
+          workspace: shared
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: $(params.git_https_url)
+        - name: revision
+          value: $(params.branch)
+        - name: depth
+          value: 1
+        - name: deleteExisting
+          value: false
+
+    - name: delete-ssh-key
+      runAfter:
+        - clone-repo
+      workspaces:
+        - name: shared
+      taskSpec:
+        workspaces:
+          - name: shared
+        steps:
+          - name: delete
+            image: {{ .Values.tekton.pipelineBaseImage }}
+            workingDir: $(workspaces.shared.path)
+            script: |
+              rm -f id_rsa
+
+    - name: delete-ssh-key
+      runAfter:
+        - clone-repo
+      workspaces:
+        - name: shared
+      taskSpec:
+        workspaces:
+          - name: shared
+        steps:
+          - name: delete
+            image: {{ .Values.tekton.pipelineBaseImage }}
+            workingDir: $(workspaces.shared.path)
+            script: |
+              rm -f id_rsa
 {{- end -}}
