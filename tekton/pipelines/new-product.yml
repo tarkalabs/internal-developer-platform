@@ -146,8 +146,6 @@ spec:
         params:
           - name: idp_base_image
             default: $(params.idp_base_image)
-          - name: idp_platform_namespace
-            default: $(params.idp_platform_namespace)
           - name: idp_platform_admin_email
             default: $(params.idp_platform_admin_email)
           - name: idp_platform_admin_name
@@ -243,8 +241,6 @@ spec:
             default: $(params.idp_platform_ops_iam_role_arn)
           - name: idp_platform_debug_mode
             default: $(params.idp_platform_debug_mode)
-          - name: base_domain
-            default: $(params.base_domain)
         steps:
           - name: helm-install
             image: $(params.idp_base_image)
@@ -275,7 +271,7 @@ spec:
 
     - name: setup-git-repos
       runAfter:
-        - update-tekton-resources
+        - configure-platform-resources
       workspaces:
         - name: shared
       taskSpec:
@@ -286,8 +282,6 @@ spec:
             default: $(params.idp_platform_debug_mode)
           - name: idp_base_image
             default: $(params.idp_base_image)
-          - name: base_domain
-            default: $(params.base_domain)
         steps:
           - name: configure-webhooks
             image: $(params.idp_base_image)
@@ -297,8 +291,6 @@ spec:
             env:
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
-              - name: HELM_CHART_PATH
-                value: "$(workspaces.shared.path)/kubernetes/app-helm-chart/"
           - name: commit-and-push
             image: $(params.idp_base_image)
             workingDir: $(workspaces.shared.path)
