@@ -35,7 +35,7 @@ func getSecurityTrimmedSvcJson(svcDef SvcDefinition) (string) {
 
   svcJson, err := json.Marshal(svcDef)
   checkError(err)
-  return svcJson
+  return string(svcJson)
 }
 
 func main() {
