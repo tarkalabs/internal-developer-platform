@@ -64,7 +64,7 @@ func main() {
       "--set", fmt.Sprintf("platform.appPipelineIAMRoleARN=%s", os.Getenv("PIPELINE_IAM_ROLE_ARN")),
       "--set", fmt.Sprintf("platform.pipelineStorageClass=%s", os.Getenv("PIPELINE_DEFAULT_STORAGE_CLASS")),
       "--set", fmt.Sprintf("platform.namespace=%s", os.Getenv("PLATFORM_NAMESPACE")),
-      "--set", fmt.Sprintf("secretData.svcJson='%s'", getSecurityTrimmedSvcJson(svcDef)),
+      "--set", fmt.Sprintf("secretData.svcJson=%s", getSecurityTrimmedSvcJson(svcDef)),
       "--set", fmt.Sprintf("secretData.githubToken=%s", svcDef.GithubWebhookSecretToken),
       "--set", fmt.Sprintf("secretData.sshDeployKey=%s", svcDef.GithubDeployKey),
       "--set", fmt.Sprintf("secretData.ecrRepoUrl=%s", os.Getenv("BASE_ECR_URL") + "/" + svcDef.ProductName),
