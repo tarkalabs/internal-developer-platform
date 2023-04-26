@@ -33,13 +33,13 @@ spec:
         workspaces:
           - name: shared
             volumeClaimTemplate:
-            spec:
-              storageClassName: {{ .Values.platform.pipelineStorageClass }}
-              accessModes:
-                - ReadWriteOnce
-              resources:
-                requests:
-                  storage: 1Gi
+              spec:
+                storageClassName: {{ .Values.platform.pipelineStorageClass }}
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi
         params:
           - name: branch
             value: $(tt.params.branch)

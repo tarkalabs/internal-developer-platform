@@ -25,5 +25,7 @@ RUN curl https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz | tar -xz -
 
 ENV PATH="$PATH:/usr/local/go/bin"
 
+COPY --from=hairyhenderson/gomplate:stable /gomplate /usr/local/go/bin/gomplate
+
 # Set the default shell to bash
 SHELL ["/bin/bash", "-c"]

@@ -42,7 +42,10 @@ spec:
       default: dev
     - name: idp_base_image
       description: Base image to use for all the tasks
-      default: 260741046218.dkr.ecr.us-east-1.amazonaws.com/idp:base-v3
+      default: 260741046218.dkr.ecr.us-east-1.amazonaws.com/idp:base-v4
+    - name: idp_platform_ops_iam_role_arn
+      description: Platform IAM role to use for app pipelines
+      default: xxx
     - name: idp_platform_namespace
       description: Platform namespace to create tekton resources in
       default: idp-platform-devops
@@ -86,6 +89,9 @@ spec:
       taskSpec:
         workspaces:
           - name: shared
+        results:
+          - name: aws-account-id
+          - name: eks-oidc-id
         params:
           - name: idp_base_image
             default: $(params.idp_base_image)
@@ -107,6 +113,8 @@ spec:
             workingDir: $(workspaces.shared.path)/scripts
             script: |
               printf '%s' "$MICROSERVICES_JSON" > microservices.json
+              aws --region $(params.aws_region) sts get-caller-identity --output text --query "Account" > $(results.aws-account-id.path)
+              aws --region $(params.aws_region) eks describe-cluster --name $(params.eks_cluster_name) --output text --query "cluster.identity.oidc.issuer" | rev | cut -d'/' -f1 | rev > $(results.eks-oidc-id.path)
             env:
               - name: MICROSERVICES_JSON
                 value: $(params.microservices_json)
@@ -133,13 +141,23 @@ spec:
       taskSpec:
         workspaces:
           - name: shared
+        results:
+          - name: app-role-arn
         params:
           - name: idp_base_image
             default: $(params.idp_base_image)
+          - name: idp_platform_namespace
+            default: $(params.idp_platform_namespace)
           - name: idp_platform_admin_email
             default: $(params.idp_platform_admin_email)
           - name: idp_platform_admin_name
             default: $(params.idp_platform_admin_name)
+          - name: aws_region
+            default: $(params.aws_region)
+          - name: product_name
+            default: $(params.product_name)
+          - name: product_env_prefix
+            default: $(params.product_env_prefix)
           - name: base_domain
             default: $(params.base_domain)
           - name: predefined_template
@@ -174,6 +192,33 @@ spec:
                 value: "$(workspaces.shared.path)/github-workflows"
               - name: OUTPUT_PATH
                 value: "$(workspaces.shared.path)/output"
+          - name: trust-policy-json
+            image: $(params.idp_base_image)
+            workingDir: $(workspaces.shared.path)
+            script: |
+              gomplate -f scripts/eks-iam-role-trust-policy.json.tmpl > eks-iam-role-trust-policy.json
+            env:
+              - name: AWS_ACCOUNT_ID
+                value: $(tasks.init-and-validate.results.aws-account-id)
+              - name: AWS_REGION
+                value: $(params.aws_region)
+              - name: EKS_OIDC_ID
+                value: $(tasks.init-and-validate.results.eks-oidc-id)
+              - name: PRODUCT_APP_NAMESPACE
+                value: $(params.product_env_prefix)-$(params.product_name)
+          - name: create-iam-ecr-role
+            image: $(params.idp_base_image)
+            script: |
+              RoleExists=$(aws --region $(params.aws_region) iam get-role --role-name $ROLE_NAME 2>&1 | grep -v 'NoSuchEntity')
+              if [ -z "$RoleExists" ]; then
+                aws --region $(params.aws_region) iam create-role --role-name $ROLE_NAME --query "Role.Arn" --output text --assume-role-policy-document file://eks-iam-role-trust-policy.json > $(results.app-role-arn.path)
+                aws --region $(params.aws_region) iam attach-role-policy --role-name $ROLE_NAME --policy-arn "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+              else
+                echo $ROLE_NAME already exists. Skipping role creation.
+              fi
+            env:
+              - name: ROLE_NAME
+                value: idp-$(params.product_name)-app-role
 
     - name: update-tekton-resources
       runAfter:
@@ -190,6 +235,8 @@ spec:
             default: $(params.idp_base_image)
           - name: idp_platform_namespace
             default: $(params.idp_platform_namespace)
+          - name: idp_platform_ops_iam_role_arn
+            default: $(params.idp_platform_ops_iam_role_arn)
           - name: idp_platform_debug_mode
             default: $(params.idp_platform_debug_mode)
           - name: base_domain
@@ -215,6 +262,10 @@ spec:
                 value: $(params.idp_base_image)
               - name: PIPELINE_DEFAULT_STORAGE_CLASS
                 value: gp3-delete
+              - name: PIPELINE_IAM_ROLE_ARN
+                value: $(params.idp_platform_ops_iam_role_arn)
+              - name: APP_IAM_ROLE_ARN
+                value: $(tasks.generate-resources.results.app-role-arn)
 
     - name: setup-git-repos
       runAfter:
