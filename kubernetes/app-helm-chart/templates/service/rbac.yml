@@ -1,0 +1,10 @@
+{{- if .Values.platform.createAppResources -}}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "app.sa.name" . }}
+  namespace: {{ .Values.namespace }}
+  labels: {{ include "common.labels" . | nindent 4 }}
+  annotations:
+    eks.amazonaws.com/role-arn: {{ .Values.platform.appIAMRoleARN }}
+{{- end -}}

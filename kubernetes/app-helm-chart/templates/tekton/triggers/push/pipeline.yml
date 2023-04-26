@@ -100,7 +100,7 @@ spec:
             script: |
               rm -f id_rsa
 
-    - name: ecr-build-and-push
+    - name: build
       runAfter:
         - clone-repo
       workspaces:
@@ -111,4 +111,49 @@ spec:
       params:
         - name: IMAGE
           value: $(tasks.init.results.ecr-image)
+
+    - name: deploy
+      runAfter:
+        - build
+      workspaces:
+        - name: shared
+      taskSpec:
+        workspaces:
+          - name: shared
+        params:
+          - name: secret_name
+            default: "$(params.branch)-$(params.owner_and_repo)"
+          - name: idp_base_image
+            default: $(params.idp_base_image)
+          - name: idp_platform_namespace
+            default: $(params.idp_platform_namespace)
+          - name: idp_platform_debug_mode
+            default: $(params.idp_platform_debug_mode)
+        steps:
+          - name: helm-install
+            image: $(params.idp_base_image)
+            workingDir: $(workspaces.shared.path)
+            script: |
+              go run scripts/resource-definitions.go scripts/deploy-app.go
+            env:
+              - name: MICROSERVICES_JSON_FILE_PATH
+                value: scripts/microservices.json
+              - name: PLATFORM_NAMESPACE
+                value: $(params.idp_platform_namespace)
+              - name: DEBUG_MODE
+                value: $(params.idp_platform_debug_mode)
+              - name: HELM_CHART_PATH
+                value: $(workspaces.shared.path)/kubernetes/app-helm-chart/
+              - name: IMAGE
+                value: $(tasks.init.results.ecr-image)
+              - name: APP_PORT
+                valueFrom:
+                  secretKeyRef:
+                    name: $(params.secret_name)
+                    key: app-port
+              - name: APP_IAM_ROLE_ARN
+                valueFrom:
+                  secretKeyRef:
+                    name: $(params.secret_name)
+                    key: app-iam-role-arn
 {{- end -}}

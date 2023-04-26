@@ -32,7 +32,9 @@ func createFolders(path string) {
 
 func prefillRequiredData(svcDef *SvcDefinition) {
   svcDef.Name = strings.ReplaceAll(strings.ToLower(svcDef.Name), "_", "-")
+  svcDef.ProductName = strings.ReplaceAll(strings.ToLower(svcDef.ProductName), "_", "-")
   if (svcDef.Description == "") { svcDef.Description = "Generated via Tarkalabs IDP" }
+  if (svcDef.ProductSlugName == "") { svcDef.ProductSlugName = svcDef.ProductName }
   if (svcDef.SlugName == "") { svcDef.SlugName = svcDef.Name }
   svcDef.SlugName = strings.ReplaceAll(strings.ToLower(svcDef.SlugName), "_", "-")
   if (svcDef.GitBranch == "") { svcDef.GitBranch = "main" }
@@ -43,15 +45,18 @@ func prefillRequiredData(svcDef *SvcDefinition) {
   svcDef.Namespace = svcDef.EnvPrefix + "-" + svcDef.ProductName
   svcDef.Domain = strings.ToLower(svcDef.Namespace) + "." + os.Getenv("BASE_DOMAIN")
   if strings.ToLower(svcDef.Type) == "frontend" {
-    svcDef.HttpPath = "/"
+    svcDef.AppDomain = svcDef.EnvPrefix + "-" + svcDef.ProductSlugName + "." + os.Getenv("BASE_DOMAIN")
+    svcDef.PathPrefix = "/"
   } else {
-    svcDef.HttpPath = "/api/"
+    svcDef.AppDomain = svcDef.EnvPrefix + "-" + svcDef.ProductSlugName + "-api." + os.Getenv("BASE_DOMAIN")
+    svcDef.PathPrefix = "/api/"
   }
 
   svcDef.GithubWebhookSecretToken = randomString(10)
   if strings.TrimSpace(svcDef.GithubWebhookPAT) == "" {
     svcDef.GithubWebhookPAT = os.Getenv("GITHUB_WEBHOOK_ACCESS_TOKEN")
   }
+
   svcDef.GithubWebhookDomain = "hooks." + os.Getenv("BASE_DOMAIN")
   svcDef.GithubWebhookPathPrefix = "/" + svcDef.Namespace + "/" + svcDef.EnvPrefix + "-" + svcDef.SlugName
   svcDef.GithubWebhookUrl = "https://" + svcDef.GithubWebhookDomain + svcDef.GithubWebhookPathPrefix

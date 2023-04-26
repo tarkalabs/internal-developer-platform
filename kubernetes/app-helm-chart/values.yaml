@@ -13,6 +13,8 @@ secretData:
 platform:
   secretName: <branch>_<owner>-<repo>
   namespace: idp-platform-devops
+  appPort: 3000 # this will override all ports for deployment & svc definitions
+  appIAMRoleARN: xxx
   appPipelineIAMRoleARN: xxx
   pipelineStorageClass: gp3
   createAppResources: true

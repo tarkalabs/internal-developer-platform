@@ -14,6 +14,7 @@ type SvcDefinition struct {
   Language string `json:"language"`
   MajorVersion string `json:"major_version"`
   ProductName string `json:"product_name"`
+  ProductSlugName string `json:"product_slug_name"`
   AdminName string `json:"admin_name"`
   AdminEmail string `json:"admin_email"`
   Name string `json:"name"`
@@ -29,7 +30,8 @@ type SvcDefinition struct {
   // below attributes will get overridden while generating sources
   Namespace string `json:"namespace"`
   Domain string `json:"domain"`
-  HttpPath string `json:"http_path"`
+  AppDomain string `json:"app_domain"`
+  PathPrefix string `json:"path_prefix"`
   GithubWebhookUrl string `json:"github_webhook_url"`
   GithubWebhookDomain string `json:"github_webhook_domain"`
   GithubWebhookPathPrefix string `json:"github_webhook_path_prefix"`
