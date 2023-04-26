@@ -1,0 +1,19 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Sid": "",
+          "Effect": "Allow",
+          "Principal": {
+              "Federated": "arn:aws:iam::{{ getenv "AWS_ACCOUNT_ID" }}:oidc-provider/oidc.eks.{{ getenv "AWS_REGION" }}.amazonaws.com/id/{{ getenv "EKS_OIDC_ID" }}"
+          },
+          "Action": "sts:AssumeRoleWithWebIdentity",
+          "Condition": {
+              "StringEquals": {
+                  "oidc.eks.{{ getenv "AWS_REGION" }}.amazonaws.com/id/{{ getenv "EKS_OIDC_ID" }}:aud": "sts.amazonaws.com",
+                  "oidc.eks.{{ getenv "AWS_REGION" }}.amazonaws.com/id/{{ getenv "EKS_OIDC_ID" }}:sub": "system:serviceaccount:{{ getenv "PRODUCT_APP_NAMESPACE" }}:*"
+              }
+          }
+      }
+  ]
+}
