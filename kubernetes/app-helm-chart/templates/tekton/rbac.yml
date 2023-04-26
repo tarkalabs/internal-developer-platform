@@ -4,6 +4,8 @@ kind: ServiceAccount
 metadata:
   name: {{ template "tekton.sa.name" . }}
   namespace: {{ .Values.platform.namespace }}
+  annotations:
+    eks.amazonaws.com/role-arn: {{ .Values.platform.appPipelineIAMRoleARN }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1

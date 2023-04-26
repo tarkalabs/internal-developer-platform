@@ -23,26 +23,48 @@ spec:
     - name: init
       workspaces:
         - name: shared
+      params:
+        - name: secret_name
+          value: "$(params.branch)-$(params.owner_and_repo)"
+        - name: git_short_sha
+          value: $(params.git_short_sha)
       taskSpec:
+        results:
+          - name: ecr-image
         workspaces:
           - name: shared
         params:
-          - name: branch
-            default: "$(params.branch)"
-          - name: owner_and_repo
-            default: "$(params.owner_and_repo)"
+          - name: git_short_sha
+            default: $(params.git_short_sha)
         steps:
           - name: init
             image: {{ .Values.tekton.pipelineBaseImage }}
             workingDir: $(workspaces.shared.path)
             script: |
               echo "$SSH_DEPLOY_KEY" > id_rsa
+              echo -n "$ECR_REPO_URL:$ENV_PREFIX-$APP_SLUG_NAME-$(params.git_short_sha)" > $(results.ecr-image.path)
             env:
               - name: SSH_DEPLOY_KEY
                 valueFrom:
                   secretKeyRef:
-                    name: $(params.branch)-$(params.owner_and_repo)
+                    name: $(params.secret_name)
                     key: ssh-deploy-key
+              - name: ECR_REPO_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: $(params.secret_name)
+                    key: ecr-repo-url
+              - name: ENV_PREFIX
+                valueFrom:
+                  secretKeyRef:
+                    name: $(params.secret_name)
+                    key: env-prefix
+              - name: APP_SLUG_NAME
+                valueFrom:
+                  secretKeyRef:
+                    name: $(params.secret_name)
+                    key: app-slug-name
+
     - name: clone-repo
       runAfter:
         - init
@@ -78,18 +100,15 @@ spec:
             script: |
               rm -f id_rsa
 
-    - name: delete-ssh-key
+    - name: ecr-build-and-push
       runAfter:
         - clone-repo
       workspaces:
-        - name: shared
-      taskSpec:
-        workspaces:
-          - name: shared
-        steps:
-          - name: delete
-            image: {{ .Values.tekton.pipelineBaseImage }}
-            workingDir: $(workspaces.shared.path)
-            script: |
-              rm -f id_rsa
+        - name: source
+          workspace: shared
+      taskRef:
+        name: kaniko
+      params:
+        - name: IMAGE
+          value: $(tasks.init.results.ecr-image)
 {{- end -}}
