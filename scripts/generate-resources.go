@@ -16,7 +16,7 @@ func checkError(err error) {
   if err != nil { panic(err) }
 }
 
-func randomString(length int) string {
+func randomPassword(length int) string {
 	rand.Seed(time.Now().UnixNano())
 	b := make([]byte, length+2)
 	rand.Read(b)
@@ -52,7 +52,7 @@ func prefillRequiredData(svcDef *SvcDefinition) {
     svcDef.PathPrefix = "/api/"
   }
 
-  svcDef.GithubWebhookSecretToken = randomString(10)
+  svcDef.GithubWebhookSecretToken = randomPassword(14)
   if strings.TrimSpace(svcDef.GithubWebhookPAT) == "" {
     svcDef.GithubWebhookPAT = os.Getenv("GITHUB_WEBHOOK_ACCESS_TOKEN")
   }

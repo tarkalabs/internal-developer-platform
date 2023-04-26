@@ -19,6 +19,10 @@
 {{- printf "%s-ingress" (include "common.name" .) -}}
 {{- end -}}
 
+{{- define "service-account.name" -}}
+{{- printf "%s-app-sa" (include "common.name" .) -}}
+{{- end -}}
+
 # app labels templates
 {{- define "common.labels" -}}
 env: {{ .Values.environment }}

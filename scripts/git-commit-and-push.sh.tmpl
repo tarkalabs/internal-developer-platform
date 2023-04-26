@@ -13,7 +13,7 @@ ssh-add $1
 echo Pushing all generated files to git
 git config --global user.name "{{ .AdminName }}"
 git config --global user.email "{{ .AdminEmail }}"
-git init
+git init --global init.defaultBranch main
 git remote add origin {{ .GitRepo }}
 
 echo Checking provided git branch already exists

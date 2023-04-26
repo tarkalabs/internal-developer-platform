@@ -1,4 +1,4 @@
-{{- if .Values.platform.createTektonResources -}}
+{{- if .Values.platform.createPlatformResources -}}
 apiVersion: v1
 kind: ServiceAccount
 metadata:

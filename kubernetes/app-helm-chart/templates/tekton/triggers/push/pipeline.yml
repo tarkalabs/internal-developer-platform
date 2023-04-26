@@ -1,4 +1,4 @@
-{{- if .Values.platform.createTektonResources -}}
+{{- if .Values.platform.createPlatformResources -}}
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
@@ -102,7 +102,7 @@ spec:
 
     - name: build
       runAfter:
-        - clone-repo
+        - delete-ssh-key
       workspaces:
         - name: source
           workspace: shared
@@ -117,33 +117,31 @@ spec:
         - build
       workspaces:
         - name: shared
+      params:
+        - name: secret_name
+          value: "$(params.branch)-$(params.owner_and_repo)"
       taskSpec:
         workspaces:
           - name: shared
-        params:
-          - name: secret_name
-            default: "$(params.branch)-$(params.owner_and_repo)"
-          - name: idp_base_image
-            default: $(params.idp_base_image)
-          - name: idp_platform_namespace
-            default: $(params.idp_platform_namespace)
-          - name: idp_platform_debug_mode
-            default: $(params.idp_platform_debug_mode)
         steps:
           - name: helm-install
-            image: $(params.idp_base_image)
+            image: {{ .Values.tekton.pipelineBaseImage }}
             workingDir: $(workspaces.shared.path)
             script: |
               go run scripts/resource-definitions.go scripts/deploy-app.go
             env:
-              - name: MICROSERVICES_JSON_FILE_PATH
-                value: scripts/microservices.json
+              - name: SVC_JSON
+                valueFrom:
+                  secretKeyRef:
+                    name: $(params.secret_name)
+                    key: svc-json
               - name: PLATFORM_NAMESPACE
-                value: $(params.idp_platform_namespace)
-              - name: DEBUG_MODE
-                value: $(params.idp_platform_debug_mode)
+                value: {{ .Values.platform.namespace }}
               - name: HELM_CHART_PATH
-                value: $(workspaces.shared.path)/kubernetes/app-helm-chart/
+                valueFrom:
+                  secretKeyRef:
+                    name: $(params.secret_name)
+                    key: helm-chart-github-url
               - name: IMAGE
                 value: $(tasks.init.results.ecr-image)
               - name: APP_PORT

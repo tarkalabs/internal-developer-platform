@@ -220,7 +220,7 @@ spec:
               - name: ROLE_NAME
                 value: idp-$(params.product_name)-app-role
 
-    - name: update-tekton-resources
+    - name: configure-platform-resources
       runAfter:
         - generate-resources
       workspaces:
@@ -231,6 +231,10 @@ spec:
         params:
           - name: product_base_ecr_repo_url
             default: $(params.product_base_ecr_repo_url)
+          - name: idp_git_repo_url
+            default: $(params.idp_git_repo_url)
+          - name: idp_git_repo_revision
+            default: $(params.idp_git_repo_revision)
           - name: idp_base_image
             default: $(params.idp_base_image)
           - name: idp_platform_namespace
@@ -246,7 +250,7 @@ spec:
             image: $(params.idp_base_image)
             workingDir: $(workspaces.shared.path)
             script: |
-              go run scripts/resource-definitions.go scripts/configure-tekton-triggers.go
+              go run scripts/resource-definitions.go scripts/configure-platform-resources.go
             env:
               - name: MICROSERVICES_JSON_FILE_PATH
                 value: scripts/microservices.json
@@ -266,6 +270,8 @@ spec:
                 value: $(params.idp_platform_ops_iam_role_arn)
               - name: APP_IAM_ROLE_ARN
                 value: $(tasks.generate-resources.results.app-role-arn)
+              - name: HELM_CHART_GITHUB_URL
+                value: $(params.idp_git_repo_url)/tree/$(params.idp_git_repo_revision)/kubernetes/app-helm-chart
 
     - name: setup-git-repos
       runAfter:

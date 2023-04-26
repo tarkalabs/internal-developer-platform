@@ -26,6 +26,18 @@ func runSystemCommand(name string, args ...string) {
   checkError(err)
 }
 
+func getSecurityTrimmedSvcJson(svcDef SvcDefinition) (string) {
+  // Clearing all security related keys
+  svcDef.GithubDeployKey = ""
+  svcDef.GithubWebhookPAT = ""
+  svcDef.DBConnString = ""
+  svcDef.GithubWebhookSecretToken = ""
+
+  svcJson, err := json.Marshal(svcDef)
+  checkError(err)
+  return svcJson
+}
+
 func main() {
   svcData, err := os.ReadFile(os.Getenv("MICROSERVICES_JSON_FILE_PATH"))
   checkError(err)
@@ -47,10 +59,12 @@ func main() {
       "--set", fmt.Sprintf("namespace=%s", svcDef.Namespace),
       "--set", fmt.Sprintf("platform.secretName=%s", svcDef.GitBranch + "-" + ownerAndRepoFormatted),
       "--set", fmt.Sprintf("platform.createAppResources=false"),
+      "--set", fmt.Sprintf("platform.helmChartGithubUrl=%s", os.Getenv("HELM_CHART_GITHUB_URL")),
       "--set", fmt.Sprintf("platform.appIAMRoleARN=%s", os.Getenv("APP_IAM_ROLE_ARN")),
       "--set", fmt.Sprintf("platform.appPipelineIAMRoleARN=%s", os.Getenv("PIPELINE_IAM_ROLE_ARN")),
       "--set", fmt.Sprintf("platform.pipelineStorageClass=%s", os.Getenv("PIPELINE_DEFAULT_STORAGE_CLASS")),
       "--set", fmt.Sprintf("platform.namespace=%s", os.Getenv("PLATFORM_NAMESPACE")),
+      "--set", fmt.Sprintf("secretData.svcJson='%s'", getSecurityTrimmedSvcJson(svcDef)),
       "--set", fmt.Sprintf("secretData.githubToken=%s", svcDef.GithubWebhookSecretToken),
       "--set", fmt.Sprintf("secretData.sshDeployKey=%s", svcDef.GithubDeployKey),
       "--set", fmt.Sprintf("secretData.ecrRepoUrl=%s", os.Getenv("BASE_ECR_URL") + "/" + svcDef.ProductName),

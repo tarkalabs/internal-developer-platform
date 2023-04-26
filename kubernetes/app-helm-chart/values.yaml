@@ -9,16 +9,18 @@ secretData:
   githubToken: xxx
   sshDeployKey: xxx
   ecrRepoUrl: xxx
+  svcJson: xxx
 
 platform:
   secretName: <branch>_<owner>-<repo>
+  helmChartGithubUrl: https://github.com/tarkalabs/internal-developer-platform/tree/dev/kubernetes/app-helm-chart
   namespace: idp-platform-devops
   appPort: 3000 # this will override all ports for deployment & svc definitions
   appIAMRoleARN: xxx
   appPipelineIAMRoleARN: xxx
   pipelineStorageClass: gp3
   createAppResources: true
-  createTektonResources: true
+  createPlatformResources: true
 
 deployment:
   replicas: 1
