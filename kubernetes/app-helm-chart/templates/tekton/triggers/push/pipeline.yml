@@ -65,7 +65,7 @@ spec:
                     name: $(params.secret_name)
                     key: app-slug-name
 
-    - name: clone-repo
+    - name: clone-app-repo
       runAfter:
         - init
       workspaces:
@@ -85,9 +85,29 @@ spec:
         - name: deleteExisting
           value: false
 
+    - name: clone-idp-repo
+      runAfter:
+        - init
+      workspaces:
+        - name: output
+          workspace: shared
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: {{ .Values.platform.idpRepoUrl }}
+        - name: revision
+          value: {{ .Values.platform.idpRepoRevision }}
+        - name: subdirectory
+          value: idp
+        - name: depth
+          value: 1
+        - name: deleteExisting
+          value: false
+
     - name: delete-ssh-key
       runAfter:
-        - clone-repo
+        - clone-app-repo
       workspaces:
         - name: shared
       taskSpec:
@@ -114,6 +134,7 @@ spec:
 
     - name: deploy
       runAfter:
+        - clone-idp-repo
         - build
       workspaces:
         - name: shared
@@ -126,7 +147,7 @@ spec:
         steps:
           - name: helm-install
             image: {{ .Values.tekton.pipelineBaseImage }}
-            workingDir: $(workspaces.shared.path)
+            workingDir: $(workspaces.shared.path)/idp
             script: |
               go run scripts/resource-definitions.go scripts/deploy-app.go
             env:
@@ -138,10 +159,7 @@ spec:
               - name: PLATFORM_NAMESPACE
                 value: {{ .Values.platform.namespace }}
               - name: HELM_CHART_PATH
-                valueFrom:
-                  secretKeyRef:
-                    name: $(params.secret_name)
-                    key: helm-chart-github-url
+                value: {{ .Values.platform.idpRepoAppHelmChartPath }}
               - name: IMAGE
                 value: $(tasks.init.results.ecr-image)
               - name: APP_PORT

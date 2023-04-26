@@ -266,8 +266,12 @@ spec:
                 value: $(params.idp_platform_ops_iam_role_arn)
               - name: APP_IAM_ROLE_ARN
                 value: $(tasks.generate-resources.results.app-role-arn)
-              - name: HELM_CHART_GITHUB_URL
-                value: $(params.idp_git_repo_url)/tree/$(params.idp_git_repo_revision)/kubernetes/app-helm-chart
+              - name: IDP_REPO_URL
+                value: $(params.idp_git_repo_url)
+              - name: IDP_REPO_REVISION
+                value: $(params.idp_git_repo_revision)
+              - name: IDP_REPO_APP_HELM_CHART_PATH
+                value: kubernetes/app-helm-chart
 
     - name: setup-git-repos
       runAfter:

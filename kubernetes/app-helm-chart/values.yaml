@@ -13,7 +13,9 @@ secretData:
 
 platform:
   secretName: <branch>_<owner>-<repo>
-  helmChartGithubUrl: https://github.com/tarkalabs/internal-developer-platform/tree/dev/kubernetes/app-helm-chart
+  idpRepoUrl: https://github.com/tarkalabs/internal-developer-platform
+  idpRepoRevision: dev
+  idpRepoAppHelmChartPath: kubernetes/app-helm-chart
   namespace: idp-platform-devops
   appPort: 3000 # this will override all ports for deployment & svc definitions
   appIAMRoleARN: xxx
