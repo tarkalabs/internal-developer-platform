@@ -117,7 +117,7 @@ func copyRequiredFiles(svcDef SvcDefinition) {
 
   fmt.Println("Copying", svcDef.Language, svcDef.MajorVersion, "version specific files...")
   appTemplatePath := filepath.Join(os.Getenv("APP_TEMPLATES_PATH"), svcDef.Language, svcDef.MajorVersion)
-  runSystemCommand("cp", "-rf", appTemplatePath + string(filepath.Separator) + "*", svcDef.GeneratedFilesPath + string(filepath.Separator))
+  runSystemCommand("bash", "-c", "cp -rf " + appTemplatePath + string(filepath.Separator) + "* " + svcDef.GeneratedFilesPath + string(filepath.Separator))
 }
 
 func main() {
