@@ -87,7 +87,7 @@ spec:
 
     - name: clone-idp-repo
       runAfter:
-        - init
+        - clone-app-repo
       workspaces:
         - name: output
           workspace: shared

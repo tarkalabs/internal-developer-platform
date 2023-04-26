@@ -3,7 +3,6 @@ import (
   "fmt"
   "os"
   "bytes"
-  "strings"
   "os/exec"
   "encoding/json"
 )
@@ -31,7 +30,6 @@ func main() {
   err := json.Unmarshal([]byte(os.Getenv("SVC_JSON")), &svcDef)
   checkError(err)
   fmt.Println("Deploying app:", svcDef.Name)
-  ownerAndRepoFormatted := strings.ToLower(strings.Replace(strings.ReplaceAll(svcDef.OwnerAndRepo, "_", "-"), "/", "-", 1))
   helm_args := []string {
     "upgrade", "--install", "--wait", // "--dry-run",
     "--namespace", os.Getenv("PLATFORM_NAMESPACE"),
