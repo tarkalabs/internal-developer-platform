@@ -18,14 +18,17 @@ git remote add origin {{ .GitRepo }}
 
 echo Checking provided git branch already exists
 exists=$(git ls-remote --heads {{ .GitRepo }} {{ .GitBranch }})
-if [[ $exists == "" ]]; then
-  git checkout -b {{ .GitBranch }}
-  git add .
-  git commit -m "Initial commit"
-
-  echo Pushing files to git
-  git push origin {{ .GitBranch }}
-else
+if [[ $exists != "" ]]; then
   echo "Branch ({{ .GitBranch }}) already exists! Exiting!"
-  exit 1
+  # TODO only put exit 1 after implementation is done
+  # exit 1
+  git push --delete origin {{ .GitBranch }}
 fi
+
+echo Creating initial commit with all the files
+git checkout -b {{ .GitBranch }}
+git add .
+git commit -m "Initial commit"
+
+echo Pushing files to git
+git push origin {{ .GitBranch }}
